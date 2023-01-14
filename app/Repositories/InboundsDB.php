@@ -16,14 +16,16 @@ class InboundsDB
     public static function updateNetworkTrafficByPort($port, $sent, $received)
     {
         $record = DB::table('inbounds')->where('port', $port)->first();
-        DB::table('inbounds')->where('port', $port)
-            ->update(['up' => $record->up + $sent,
-                'down' => $record->down + $received
-            ]);
+        if (!is_null($record)) {
+            DB::table('inbounds')->where('port', $port)
+                ->update(['up' => $record->up + $sent,
+                    'down' => $record->down + $received
+                ]);
+        }
     }
 
     public static function getAllPorts()
     {
-        return DB::table('inbounds')->pluck('port')->toArray();
+        return DB::table('inbounds')->where('enable', 1)->pluck('port')->toArray();
     }
 }

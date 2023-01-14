@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\TrafficHandlerJob;
 use App\Repositories\InboundsDB;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -46,26 +47,16 @@ class TrafficMonitor extends Command
 //        if (!$ssh->login('root', 'Ss44644831')) {
 //            exit('Login Failed');
 //        }
+//        $txt = $ssh->exec("iftop -P -n -N -i ens160 -t -s 5 -L 100");
+//        $ssh->disconnect();
+//        Cache::forever('traffic', $txt);
+//        dd($txt);
+//        $txt = shell_exec("iftop -P -n -N -t -s 5 -f -L 100");
+//        $txt = Cache::get('traffic');
+
         $ports = InboundsDB::getAllPorts();
         foreach ($ports as $port) {
-            $txt = shell_exec("iftop -P -n -N -t -s 10 -f 'port '$port");
-            $t = array_filter(explode(PHP_EOL, $txt));
-            $cumulative = array_splice($t, count($t) - 2, 1);
-            $traffic_data = array_values(array_filter(explode(' ', $cumulative[0])));
-            if (str_contains($traffic_data[2], 'MB')) {
-                $rate = 1000000;
-            } elseif (str_contains($traffic_data[2], 'KB')) {
-                $rate = 1000;
-            } else {
-                $rate = 1;
-            }
-            preg_match('!\d+!', $traffic_data[2], $match1);
-            preg_match('!\d!', $traffic_data[3], $match2);
-            if (count($match1) > 0) {
-                $sent = (int)$match1[0] * $rate;
-                $received = (int)$match2[0] * $rate;
-                InboundsDB::updateNetworkTrafficByPort($port, $sent, $received);
-            }
+            TrafficHandlerJob::dispatch($port);
         }
     }
 }
