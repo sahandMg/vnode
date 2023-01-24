@@ -76,7 +76,7 @@ class TrafficMonitor extends Command
                 } elseif (str_contains($usage, 'KB')) {
                     $rate = 1000;
                 } else {
-                    $rate = 5;
+                    $rate = 10;
                 }
                 preg_match('!\d+!', $usage, $match);
                 if (count($match) > 0 && $port != env('TRAFFIC_PORT')) {
