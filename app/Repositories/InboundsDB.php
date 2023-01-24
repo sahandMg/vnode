@@ -28,4 +28,9 @@ class InboundsDB
     {
         return DB::table('inbounds')->where('enable', 1)->pluck('port')->toArray();
     }
+
+    public static function getAllInbounds()
+    {
+        return DB::table('inbounds')->get();
+    }
 }

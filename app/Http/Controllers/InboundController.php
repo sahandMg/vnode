@@ -12,8 +12,33 @@ class InboundController extends Controller
     {
         $record =  InboundsDB::getUserByRemark(\request()->get('remark'));
         if (is_null($record)) {
-            return response()->json('Data Not Found', Response::HTTP_NOT_FOUND);
+            $data = [
+                'status' => Response::HTTP_NOT_FOUND,
+                'data' => 'حساب یافت نشد'
+            ];
+            return response()->json($data, Response::HTTP_NOT_FOUND);
         }
-        return \response()->json($record, Response::HTTP_OK);
+        $data = [
+            'status' => Response::HTTP_OK,
+            'data' => $record
+        ];
+        return \response()->json($data, Response::HTTP_OK);
+    }
+
+    public function getAllInbound()
+    {
+        $record =  InboundsDB::getAllInbounds();
+        if (count($record) == 0) {
+            $data = [
+                'status' => Response::HTTP_NOT_FOUND,
+                'data' => 'حساب یافت نشد'
+            ];
+            return response()->json($data, Response::HTTP_NOT_FOUND);
+        }
+        $data = [
+            'status' => Response::HTTP_OK,
+            'data' => $record
+        ];
+        return \response()->json($data, Response::HTTP_OK);
     }
 }

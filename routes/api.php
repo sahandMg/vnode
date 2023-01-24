@@ -16,3 +16,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('inbound', [InboundController::class, 'getInbound']);
+Route::post('inbound/all', [InboundController::class, 'getAllInbound']);

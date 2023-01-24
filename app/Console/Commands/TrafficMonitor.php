@@ -48,7 +48,7 @@ class TrafficMonitor extends Command
 //        if (!$ssh->login('root', 'Ss44644831')) {
 //            exit('Login Failed');
 //        }
-//        $txt = $ssh->exec("iftop -P -n -N -i ens160 -t -s 5 -L 100");
+//        $txt = $ssh->exec("iftop -P -n -N -i ens160 -t -s 20 -L 150");
 //        $ssh->disconnect();
 //        Cache::forever('traffic', $txt);
 //        dd($txt);
@@ -56,9 +56,9 @@ class TrafficMonitor extends Command
 //        $txt = Cache::get('traffic');
 
 //        Add theses lines to cronttab -e
-//        * * * * * php /var/www/html/vnode/artisan traffic > /var/www/html/cron.log 2>&1
-//    * * * * * sleep 30; php /var/www/html/vnode/artisan traffic > /var/www/html/cron.log 2>&1
-        $txt = shell_exec("iftop -P -n -N -t -s 2 -L 150");
+// * * * * * php /var/www/html/vnode/artisan traffic
+// * * * * * sleep 30; php /var/www/html/vnode/artisan traffic
+        $txt = shell_exec("iftop -P -n -N -t -s 25 -L 150");
         $t = array_filter(explode(PHP_EOL, $txt));
         $cumulative = array_splice($t, 7, 200);
         $sum = 0;
@@ -76,12 +76,12 @@ class TrafficMonitor extends Command
                 } elseif (str_contains($usage, 'KB')) {
                     $rate = 1000;
                 } else {
-                    $rate = 1;
+                    $rate = 5;
                 }
                 preg_match('!\d+!', $usage, $match);
                 if (count($match) > 0 && $port != env('TRAFFIC_PORT')) {
-                    $received = (int)$match[0] * $rate;
-                    $sent = (int)($match[0] / 10) * $rate;
+                    $received = (int)$match[0] * $rate * env('CORRECTION_RATE');
+                    $sent = (int)($match[0] / 10) * $rate * env('CORRECTION_RATE');
                     Log::info("Traffic usage for $ip:$port: sent: $sent & received: $received");
                     InboundsDB::updateNetworkTrafficByPort($port, $sent, $received);
                     $sum += $sent + $received;
