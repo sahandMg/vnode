@@ -51,12 +51,12 @@ class TrafficMonitor extends Command
 //        $txt = $ssh->exec("iftop -P -n -N -i ens160 -t -s 5 -L 150");
 //        $ssh->disconnect();
 //        Cache::forever('traffic', $txt);
-        $txt = Cache::get('traffic');
+//        $txt = Cache::get('traffic');
 
 //        Add theses lines to cronttab -e
 // * * * * * php /var/www/html/vnode/artisan traffic
 // * * * * * sleep 30; php /var/www/html/vnode/artisan traffic
-//        $txt = shell_exec("iftop -P -n -N -t -s 25 -L 150");
+        $txt = shell_exec("iftop -P -n -N -t -s 25 -L 150");
         $t = array_filter(explode(PHP_EOL, $txt));
         $cumulative = array_splice($t, 7, 200);
         $sum = 0;
