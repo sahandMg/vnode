@@ -62,7 +62,7 @@ class TrafficMonitor extends Command
         $t = array_filter(explode(PHP_EOL, $txt));
         $cumulative = array_splice($t, 7, 200);
         $sum = 0;
-        $ips = [];
+        $ports = [];
         for ($i = 0; $i < count($cumulative); $i++) {
             try {
                 $tmp = array_values(array_filter(explode(' ', $cumulative[$i])));
@@ -71,13 +71,11 @@ class TrafficMonitor extends Command
                 }
                 $ip = explode(':', $tmp[1])[0];
                 $port = explode(':', $tmp[1])[1];
-                if (!isset($ips[$ip])) {
-                    $ips[$ip] = 1;
-                } elseif ($ips[$ip] > 1) {
+                if (!isset($ports[$port])) {
+                    $ports[$port] = $ip;
+                } elseif ($ports[$port] != $ip) {
                     InboundsDB::disableAccountByPort($port);
                     Log::info($port." disabled");
-                } else {
-                    $ips["$ip"] += 1;
                 }
                 $usage = $tmp[6];
                 if (str_contains($usage, 'MB')) {
