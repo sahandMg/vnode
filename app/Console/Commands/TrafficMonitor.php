@@ -51,8 +51,6 @@ class TrafficMonitor extends Command
 //        $txt = $ssh->exec("iftop -P -n -N -i ens160 -t -s 20 -L 150");
 //        $ssh->disconnect();
 //        Cache::forever('traffic', $txt);
-//        dd($txt);
-//        $txt = shell_exec("iftop -P -n -N -t -s 5 -f -L 100");
 //        $txt = Cache::get('traffic');
 
 //        Add theses lines to cronttab -e
@@ -69,11 +67,13 @@ class TrafficMonitor extends Command
                 if (!str_contains($tmp[1], env('IP_ADDRESS'))) {
                     continue;
                 }
+                $source = array_values(array_filter(explode(' ', $cumulative[$i+1])));
                 $ip = explode(':', $tmp[1])[0];
                 $port = explode(':', $tmp[1])[1];
+                $source_ip = explode(':', $source[1])[0];
                 if (!isset($ports[$port])) {
-                    $ports[$port] = $ip;
-                } elseif ($ports[$port] != $ip) {
+                    $ports[$port] = $source_ip;
+                } elseif ($ports[$port] != $source_ip) {
                     InboundsDB::disableAccountByPort($port);
                     Log::info($port." disabled");
                 }
