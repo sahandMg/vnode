@@ -33,4 +33,9 @@ class InboundsDB
     {
         return DB::table('inbounds')->get();
     }
+
+    public static function disableAccountByPort($port)
+    {
+        return DB::table('inbounds')->where('port', $port)->update(['enable' => 0]);
+    }
 }
