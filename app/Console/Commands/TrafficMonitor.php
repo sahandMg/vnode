@@ -48,15 +48,15 @@ class TrafficMonitor extends Command
 //        if (!$ssh->login('root', 'Ss44644831')) {
 //            exit('Login Failed');
 //        }
-//        $txt = $ssh->exec("iftop -P -n -N -i ens160 -t -s 20 -L 150");
+//        $txt = $ssh->exec("iftop -P -n -N -i ens160 -t -s 5 -L 150");
 //        $ssh->disconnect();
 //        Cache::forever('traffic', $txt);
-//        $txt = Cache::get('traffic');
+        $txt = Cache::get('traffic');
 
 //        Add theses lines to cronttab -e
 // * * * * * php /var/www/html/vnode/artisan traffic
 // * * * * * sleep 30; php /var/www/html/vnode/artisan traffic
-        $txt = shell_exec("iftop -P -n -N -t -s 25 -L 150");
+//        $txt = shell_exec("iftop -P -n -N -t -s 25 -L 150");
         $t = array_filter(explode(PHP_EOL, $txt));
         $cumulative = array_splice($t, 7, 200);
         $sum = 0;
@@ -70,7 +70,7 @@ class TrafficMonitor extends Command
                 $source = array_values(array_filter(explode(' ', $cumulative[$i+1])));
                 $ip = explode(':', $tmp[1])[0];
                 $port = explode(':', $tmp[1])[1];
-                $source_ip = explode(':', $source[1])[0];
+                $source_ip = explode(':', $source[0])[0];
                 if (!isset($ports[$port])) {
                     $ports[$port] = $source_ip;
                 } elseif ($ports[$port] != $source_ip) {
