@@ -74,8 +74,8 @@ class TrafficMonitor extends Command
                 if (!isset($ports[$port])) {
                     $ports[$port] = $source_ip;
                 } elseif ($ports[$port] != $source_ip) {
-                    InboundsDB::disableAccountByPort($port);
                     Log::info($port." disabled");
+                    InboundsDB::disableAccountByPort($port);
                 }
                 $usage = $tmp[6];
                 if (str_contains($usage, 'MB')) {
