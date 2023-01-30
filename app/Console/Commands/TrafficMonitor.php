@@ -75,6 +75,7 @@ class TrafficMonitor extends Command
                     $ips[$ip] = 1;
                 } elseif ($ips[$ip] > 1) {
                     InboundsDB::disableAccountByPort($port);
+                    Log::info($port." disabled");
                 } else {
                     $ips["$ip"] += 1;
                 }
