@@ -67,16 +67,18 @@ class TrafficMonitor extends Command
                 if (!str_contains($tmp[1], env('IP_ADDRESS'))) {
                     continue;
                 }
-                $source = array_values(array_filter(explode(' ', $cumulative[$i+1])));
                 $ip = explode(':', $tmp[1])[0];
                 $port = explode(':', $tmp[1])[1];
-                $source_ip = explode(':', $source[0])[0];
-                if (!isset($ports[$port])) {
-                    $ports[$port] = $source_ip;
-                } elseif ($ports[$port] != $source_ip) {
-                    Log::info($port." disabled");
-//                    InboundsDB::disableAccountByPort($port);
-                }
+               if (env("UNIQUE_IP") == 1) {
+                   $source = array_values(array_filter(explode(' ', $cumulative[$i+1])));
+                   $source_ip = explode(':', $source[0])[0];
+                   if (!isset($ports[$port])) {
+                       $ports[$port] = $source_ip;
+                   } elseif ($ports[$port] != $source_ip) {
+                       Log::info($port." disabled");
+                       InboundsDB::disableAccountByPort($port);
+                   }
+               }
                 $usage = $tmp[6];
                 if (str_contains($usage, 'MB')) {
                     $rate = 1000000;
