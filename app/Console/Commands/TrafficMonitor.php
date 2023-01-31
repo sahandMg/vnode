@@ -54,13 +54,14 @@ class TrafficMonitor extends Command
 //        $txt = Cache::get('traffic');
 
 //        Add theses lines to cronttab -e
-// * * * * * php /var/www/html/vnode/artisan traffic
-// * * * * * sleep 30; php /var/www/html/vnode/artisan traffic
+ //* * * * * php /var/www/html/vnode/artisan traffic
+ //* * * * * sleep 30; php /var/www/html/vnode/artisan traffic
         $txt = shell_exec("iftop -P -n -N -t -s 25 -L 150");
         $t = array_filter(explode(PHP_EOL, $txt));
         $cumulative = array_splice($t, 7, 200);
         $sum = 0;
         $ports = [];
+        $port_div = [];
         for ($i = 0; $i < count($cumulative); $i++) {
             try {
                 $tmp = array_values(array_filter(explode(' ', $cumulative[$i])));
@@ -74,9 +75,11 @@ class TrafficMonitor extends Command
                    $source_ip = explode(':', $source[0])[0];
                    if (!isset($ports[$port])) {
                        $ports[$port] = $source_ip;
+                       $port_div[$port][] =  $source_ip;
                    } elseif ($ports[$port] != $source_ip) {
-                       Log::info($port." disabled");
-                       InboundsDB::disableAccountByPort($port);
+                       $port_div[$port][] =  $source_ip;
+//                       Log::info($port." disabled");
+//                       InboundsDB::disableAccountByPort($port);
                    }
                }
                 $usage = $tmp[6];
@@ -102,5 +105,6 @@ class TrafficMonitor extends Command
             }
         }
         Log::info('============ TOTAL USAGE: ' . $sum);
+        Log::info('============ TOTAL USAGE: ' . json_encode($port_div));
     }
 }
