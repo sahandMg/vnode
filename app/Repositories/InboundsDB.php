@@ -44,8 +44,8 @@ class InboundsDB
     public static function updateAllAvailableAccounts($sent, $received)
     {
         $active_accounts = DB::table('inbounds')->where('enable', 1)->count();
-        $normalized_sent = (int)($sent / $active_accounts * 1.3);
-        $normalized_received = (int)($received / $active_accounts * 1.3);
+        $normalized_sent = (int)($sent / $active_accounts);
+        $normalized_received = (int)($received / $active_accounts);
         $records = DB::table('inbounds')->get();
         DB::beginTransaction();
         foreach ($records as $record) {
