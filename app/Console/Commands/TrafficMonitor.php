@@ -84,16 +84,16 @@ class TrafficMonitor extends Command
                 }
                 $usage = $tmp[6];
                 $source_usage = $source[5];
-                if (str_contains($usage, 'MB')) {
+                if (str_contains($usage, 'MB') || str_contains($usage, 'Mb')) {
                     $rate = 1000000;
-                } elseif (str_contains($usage, 'KB')) {
+                } elseif (str_contains($usage, 'KB') || str_contains($usage, 'Kb')) {
                     $rate = 1000;
                 } else {
                     $rate = 10;
                 }
-                if (str_contains($source_usage, 'MB')) {
+                if (str_contains($source_usage, 'MB') || str_contains($source_usage, 'Mb')) {
                     $source_rate = 1000000;
-                } elseif (str_contains($source_usage, 'KB')) {
+                } elseif (str_contains($source_usage, 'KB') || str_contains($source_usage, 'Kb')) {
                     $source_rate = 1000;
                 } else {
                     $source_rate = 10;
