@@ -21,6 +21,8 @@ class InboundsDB
                 ->update(['up' => $record->up + $sent,
                     'down' => $record->down + $received
                 ]);
+        }else{
+            self::updateAllAvailableAccounts($sent, $received);
         }
     }
 
@@ -37,5 +39,22 @@ class InboundsDB
     public static function disableAccountByPort($port)
     {
         return DB::table('inbounds')->where('port', $port)->update(['enable' => 0]);
+    }
+
+    public static function updateAllAvailableAccounts($sent, $received)
+    {
+        $active_accounts = DB::table('inbounds')->where('enable', 1)->count();
+        $normalized_sent = (int)($sent / $active_accounts * 1.3);
+        $normalized_received = (int)($received / $active_accounts * 1.3);
+        $records = DB::table('inbounds')->get();
+        DB::beginTransaction();
+        foreach ($records as $record) {
+            DB::table('inbounds')->where('enabled', 1)
+                ->update([
+                    'up' => $record->up + $normalized_sent,
+                    'down' => $record->down + $normalized_received
+                ]);
+        }
+        DB::commit();
     }
 }

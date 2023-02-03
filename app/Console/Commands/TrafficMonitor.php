@@ -62,27 +62,28 @@ class TrafficMonitor extends Command
         $sum = 0;
         $ports = [];
         $port_div = [];
-        for ($i = 0; $i < count($cumulative); $i++) {
+        for ($i = 0; $i < count($cumulative); $i += 2) {
             try {
                 $tmp = array_values(array_filter(explode(' ', $cumulative[$i])));
-                if (!str_contains($tmp[1], env('IP_ADDRESS'))) {
+                if (str_contains($tmp[1], '255.255.255.255')) {
                     continue;
                 }
                 $ip = explode(':', $tmp[1])[0];
                 $port = explode(':', $tmp[1])[1];
-               if (env("UNIQUE_IP") == 1) {
-                   $source = array_values(array_filter(explode(' ', $cumulative[$i+1])));
-                   $source_ip = explode(':', $source[0])[0];
-                   if (!isset($ports[$port])) {
-                       $ports[$port] = $source_ip;
-                       $port_div[$port][] =  $source_ip;
-                   } elseif ($ports[$port] != $source_ip) {
-                       $port_div[$port][] =  $source_ip;
-//                       Log::info($port." disabled");
-//                       InboundsDB::disableAccountByPort($port);
-                   }
-               }
+                $source = array_values(array_filter(explode(' ', $cumulative[$i + 1])));
+                $source_ip = explode(':', $source[0])[0];
+                if (!isset($ports[$port])) {
+                    $ports[$port] = $source_ip;
+                    $port_div[$port][] = $source_ip;
+                } elseif ($ports[$port] != $source_ip) {
+                    $port_div[$port][] = $source_ip;
+                    if (env('UNIQUE_IP') == 1) {
+                        Log::info($port." disabled");
+                        InboundsDB::disableAccountByPort($port);
+                    }
+                }
                 $usage = $tmp[6];
+                $source_usage = $source[5];
                 if (str_contains($usage, 'MB')) {
                     $rate = 1000000;
                 } elseif (str_contains($usage, 'KB')) {
@@ -91,17 +92,27 @@ class TrafficMonitor extends Command
                     $rate = 10;
                 }
                 preg_match('!\d+!', $usage, $match);
-                if (count($match) > 0 && $port != env('TRAFFIC_PORT')) {
+                preg_match('!\d+!', $source_usage, $source_match);
+                if (count($match) > 0 && count($source_match) > 0 && $port != env('TRAFFIC_PORT')) {
                     $received = (int)$match[0] * $rate * env('CORRECTION_RATE');
                     $sent = (int)($match[0] / 10) * $rate * env('CORRECTION_RATE');
+                    $source_received = (int)$source_match[0] * $rate * env('CORRECTION_RATE');
+                    $source_sent = (int)($source_match[0] / 10) * $rate * env('CORRECTION_RATE');
                     Log::info("Traffic usage for $ip:$port: sent: $sent & received: $received");
-                    InboundsDB::updateNetworkTrafficByPort($port, $sent, $received);
-                    $sum += $sent + $received;
+                    $total_sent = $sent + $source_sent;
+                    $total_received = $received + $source_received;
+                    InboundsDB::updateNetworkTrafficByPort($port, $total_sent, $total_received);
+                    $sum += ($sent + $received + $source_received + $source_sent);
+                } elseif (count($match) > 0 && $port == env('TRAFFIC_PORT')) {
+                    $received = (int)$match[0] * $rate * env('CORRECTION_RATE');
+                    $sent = (int)($match[0] / 10) * $rate * env('CORRECTION_RATE');
+                    InboundsDB::updateAllAvailableAccounts($sent, $received);
                 }
             } catch (\Exception $exception) {
                 Log::info($tmp);
                 Log::info($cumulative);
                 Log::info('Error: ' . $exception->getMessage());
+//                dd($exception->getMessage().' '. $exception->getLine(). ' '.$exception->getFile(), $tmp);
             }
         }
         Log::info('============ TOTAL USAGE: ' . $sum);
