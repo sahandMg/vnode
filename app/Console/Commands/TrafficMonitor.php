@@ -91,13 +91,20 @@ class TrafficMonitor extends Command
                 } else {
                     $rate = 10;
                 }
+                if (str_contains($source_usage, 'MB')) {
+                    $source_rate = 1000000;
+                } elseif (str_contains($source_usage, 'KB')) {
+                    $source_rate = 1000;
+                } else {
+                    $source_rate = 10;
+                }
                 preg_match('!\d+!', $usage, $match);
                 preg_match('!\d+!', $source_usage, $source_match);
                 if (count($match) > 0 && count($source_match) > 0 && $port != env('TRAFFIC_PORT')) {
                     $received = (int)$match[0] * $rate * env('CORRECTION_RATE');
                     $sent = (int)($match[0] / 10) * $rate * env('CORRECTION_RATE');
-                    $source_received = (int)$source_match[0] * $rate * env('CORRECTION_RATE');
-                    $source_sent = (int)($source_match[0] / 10) * $rate * env('CORRECTION_RATE');
+                    $source_received = (int)$source_match[0] * $source_rate * env('CORRECTION_RATE');
+                    $source_sent = (int)($source_match[0] / 10) * $source_rate * env('CORRECTION_RATE');
                     Log::info("Traffic usage for $ip:$port: sent: $sent & received: $received");
                     $total_sent = $sent + $source_sent;
                     $total_received = $received + $source_received;
