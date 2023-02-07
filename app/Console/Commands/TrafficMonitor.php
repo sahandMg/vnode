@@ -75,7 +75,7 @@ class TrafficMonitor extends Command
                 if (!isset($ports[$port])) {
                     $ports[$port] = $source_ip;
                     $port_div[$port][] = $source_ip;
-                } elseif (!in_array($source_ip, $ports[$port])) {
+                } elseif (!in_array($source_ip, $port_div[$port])) {
                     $port_div[$port][] = $source_ip;
                     if (env('UNIQUE_IP') == 1) {
                         Log::info($port." disabled");
