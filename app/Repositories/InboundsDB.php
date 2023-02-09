@@ -4,6 +4,8 @@
 namespace App\Repositories;
 
 
+use App\Models\Inbound;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class InboundsDB
@@ -56,5 +58,19 @@ class InboundsDB
                 ]);
         }
         DB::commit();
+    }
+
+    public static function updateUserVol($remark, $vol)
+    {
+        $inbound = DB::table('inbounds')->where('remark', $remark)->first();
+        DB::table('inbounds')
+            ->where('remark', $remark)
+            ->update(['total' => $inbound->total + $vol]);
+    }
+
+    public static function updateExpiry($remark)
+    {
+        $inbound = Inbound::query()->where('remark', $remark)->first();
+        $inbound->update(['expiry_time' => Carbon::now()->addMonth()->getPreciseTimestamp(3)]);
     }
 }
