@@ -78,7 +78,7 @@ class InboundsDB
     public static function setAccountDate($port)
     {
         $inbound = DB::table('inbounds')->where('port', $port)->where('expiry_time', 0)->first();
-        if (is_null($inbound)) {
+        if (!is_null($inbound)) {
             DB::table('inbounds')->where('port', $port)->update(['expiry_time' => Carbon::now()->addMonth()->getPreciseTimestamp(3)]);
         }
     }
