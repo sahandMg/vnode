@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,4 +16,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('ports', function () {
+    if (isset($_GET['port'])) {
+        $ports = Cache::get('port_div');
+        $req_port = $_GET['port'];
+        return isset($ports[$req_port]) ? $ports[$req_port] : 'Not Found';
+    }
+    return Cache::get('port_div');
 });

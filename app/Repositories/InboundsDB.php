@@ -70,7 +70,16 @@ class InboundsDB
 
     public static function updateExpiry($remark)
     {
-        $inbound = Inbound::query()->where('remark', $remark)->first();
-        $inbound->update(['expiry_time' => Carbon::now()->addMonth()->getPreciseTimestamp(3)]);
+        DB::table('inbounds')
+            ->where('remark', $remark)
+            ->update(['expiry_time' => Carbon::now()->addMonth()->getPreciseTimestamp(3)]);
+    }
+
+    public static function setAccountDate($port)
+    {
+        $inbound = DB::table('inbounds')->where('port', $port)->where('expiry_time', 0)->first();
+        if (is_null($inbound)) {
+            DB::table('inbounds')->where('remark', $port)->update(['expiry_time' => Carbon::now()->addMonth()->getPreciseTimestamp(3)]);
+        }
     }
 }

@@ -75,6 +75,7 @@ class TrafficMonitor extends Command
                 if (!isset($ports[$port])) {
                     $ports[$port] = $source_ip;
                     $port_div[$port][] = $source_ip;
+                    InboundsDB::setAccountDate($port);
                 } elseif (!in_array($source_ip, $port_div[$port])) {
                     $port_div[$port][] = $source_ip;
                     if (env('UNIQUE_IP') == 1) {
@@ -122,6 +123,7 @@ class TrafficMonitor extends Command
 //                dd($exception->getMessage().' '. $exception->getLine(). ' '.$exception->getFile(), $tmp);
             }
         }
+        Cache::forever('port_div', $port_div);
         Log::info('============ TOTAL USAGE: ' . $sum);
         Log::info('============ TOTAL USAGE: ' . json_encode($port_div));
     }
