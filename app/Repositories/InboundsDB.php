@@ -65,7 +65,7 @@ class InboundsDB
         $inbound = DB::table('inbounds')->where('remark', $remark)->first();
         DB::table('inbounds')
             ->where('remark', $remark)
-            ->update(['total' => $inbound->total + $vol]);
+            ->update(['total' => $inbound->total + $vol, 'enable' => 1]);
     }
 
     public static function updateExpiry($remark)
