@@ -88,7 +88,7 @@ class InboundsDB
         foreach ($ports as $port => $ips) {
             $record = DB::table('ports')->where('port', $port)->first();
             if (is_null($record)) {
-                DB::table('ports')->where('port', $port)->insert(['port' => $port, 'ips' => serialize($ips)]);
+                DB::table('ports')->insert(['port' => $port, 'ips' => serialize($ips)]);
             }else {
                 $ips_arr = unserialize($record->ips);
                 $new_ips = array_values(array_unique(array_merge($ips_arr, $ips)));
