@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,10 +20,12 @@ Route::get('/', function () {
 });
 
 Route::get('ports', function () {
+    $ports = DB::table('ports')->get();
+    $tmp = [];
     if (isset($_GET['port'])) {
-        $ports = Cache::get('port_div');
-        $req_port = $_GET['port'];
-        return isset($ports[$req_port]) ? $ports[$req_port] : 'Not Found';
+        foreach ($ports as $port) {
+            $tmp[$port->port] = unserialize($port->ips);
+        }
     }
-    return Cache::get('port_div');
+    return $tmp;
 });
