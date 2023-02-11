@@ -90,7 +90,7 @@ class InboundsDB
             if (is_null($record)) {
                 DB::table('ports')->where('port', $port)->insert(['port' => $port, 'ips' => serialize($ips)]);
             }else {
-                $ips_arr = unserialize($port->ips);
+                $ips_arr = unserialize($record->ips);
                 $new_ips = array_values(array_unique(array_merge($ips_arr, $ips)));
                 DB::table('ports')->where('port', $port)->updateOrInsert(['port' => $port], ['ips' => serialize($new_ips)]);
             }
