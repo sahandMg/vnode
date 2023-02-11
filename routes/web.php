@@ -22,10 +22,8 @@ Route::get('/', function () {
 Route::get('ports', function () {
     $ports = DB::table('ports')->get();
     $tmp = [];
-    if (isset($_GET['port'])) {
-        foreach ($ports as $port) {
-            $tmp[$port->port] = unserialize($port->ips);
-        }
+    foreach ($ports as $port) {
+        $tmp[$port->port] = unserialize($port->ips);
     }
     return $tmp;
 });
