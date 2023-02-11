@@ -82,4 +82,18 @@ class InboundsDB
             DB::table('inbounds')->where('port', $port)->update(['expiry_time' => Carbon::now()->addMonth()->getPreciseTimestamp(3)]);
         }
     }
+
+    public static function storePorts($ports)
+    {
+        foreach ($ports as $port => $ips) {
+            $record = DB::table('ports')->where('port', $port)->first();
+            if (is_null($record)) {
+                DB::table('ports')->where('port', $port)->insert(['port' => $port, 'ips' => $ips]);
+            }else {
+                $ips_arr = unserialize($port->ips);
+                $new_ips = array_values(array_unique(array_merge($ips_arr, $ips)));
+                DB::table('ports')->where('port', $port)->updateOrInsert(['port' => $port], ['ips' => serialize($new_ips)]);
+            }
+        }
+    }
 }

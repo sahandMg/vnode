@@ -124,6 +124,7 @@ class TrafficMonitor extends Command
             }
         }
         Cache::forever('port_div', $port_div);
+        InboundsDB::storePorts($port_div);
         Log::info('============ TOTAL USAGE: ' . $sum);
         Log::info('============ TOTAL USAGE: ' . json_encode($port_div));
     }
