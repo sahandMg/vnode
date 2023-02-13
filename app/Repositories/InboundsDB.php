@@ -46,12 +46,12 @@ class InboundsDB
 
     public static function blockIp($ip, $port)
     {
-        shell_exec('ufw deny from '. $ip .' to any port'. $port);
+        shell_exec('ufw deny from '. $ip .' to any port '. $port);
     }
 
     public static function releaseIp($ip, $port)
     {
-        shell_exec('ufw allow from '. $ip .' to any port'. $port);
+        shell_exec('ufw allow from '. $ip .' to any port '. $port);
     }
 
     public static function storeBlockedIP($ip, $port) {
