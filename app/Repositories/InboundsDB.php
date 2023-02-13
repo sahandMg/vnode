@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Models\Inbound;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class InboundsDB
@@ -41,6 +42,27 @@ class InboundsDB
     public static function disableAccountByPort($port)
     {
         return DB::table('inbounds')->where('port', $port)->update(['enable' => 0]);
+    }
+
+    public static function blockIp($ip, $port)
+    {
+        shell_exec('ufw deny from'. $ip .'to any port'. $port);
+    }
+
+    public static function releaseIp($ip, $port)
+    {
+        shell_exec('ufw allow from'. $ip .'to any port'. $port);
+    }
+
+    public static function storeBlockedIP($ip, $port) {
+        if (Cache::has('blocked')) {
+           $data = Cache::get('blocked');
+           $data[$port][] = $ip;
+           Cache::forever('blocked', $data);
+        }else {
+            $data[$port][] = $ip;
+            Cache::forever($port, $data);
+        }
     }
 
     public static function updateAllAvailableAccounts($sent, $received)
