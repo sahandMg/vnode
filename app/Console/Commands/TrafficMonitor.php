@@ -78,7 +78,7 @@ class TrafficMonitor extends Command
                     InboundsDB::setAccountDate($port);
                 } elseif (!in_array($source_ip, $port_div[$port])) {
                     $port_div[$port][] = $source_ip;
-                    if (env('UNIQUE_IP') == 1 && count($port_div[$port]) > 1) {
+                    if (env('UNIQUE_IP') == 1 && count($port_div[$port]) > 3) {
                         Log::info($port." disabled");
                         InboundsDB::blockIp($source_ip,  $port);
                         InboundsDB::storeBlockedIP($source_ip,  $port);
