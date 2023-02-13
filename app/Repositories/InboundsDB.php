@@ -61,7 +61,7 @@ class InboundsDB
            Cache::forever('blocked', $data);
         }else {
             $data[$port][] = $ip;
-            Cache::forever($port, $data);
+            Cache::forever('blocked', $data);
         }
     }
 
