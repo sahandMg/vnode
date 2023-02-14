@@ -27,3 +27,11 @@ Route::get('ports', function () {
     }
     return $tmp;
 });
+
+Route::get('status', function () {
+    $inbounds = DB::table('inbounds')->get();
+    $total = $inbounds->count();
+    $active = $inbounds->where('enable', 1)->count();
+    $inactive = $inbounds->where('enable', 0)->count();
+    return compact('total', 'active', 'inactive');
+});

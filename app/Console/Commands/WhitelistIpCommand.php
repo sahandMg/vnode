@@ -42,7 +42,7 @@ class WhitelistIpCommand extends Command
             $data = Cache::get('blocked');
             foreach ($data as $port => $ips) {
                 for ($i = 0; $i < count($ips); $i++) {
-                    shell_exec('ufw allow from' . $ips[$i] . 'to any port' . $port);
+                    shell_exec('sudo ufw allow from ' . $ips[$i] . ' to any port ' . $port);
                 }
             }
             Cache::forget('blocked');
