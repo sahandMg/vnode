@@ -122,7 +122,7 @@ class TrafficMonitor extends Command
             } catch (\Exception $exception) {
                 Log::info($tmp);
                 Log::info($cumulative);
-                Log::info('Error: ' . $exception->getMessage());
+                Log::info('Error: ' . $exception->getMessage(). ' '.$exception->getLine(). ' '.$exception->getFile());
 //                dd($exception->getMessage().' '. $exception->getLine(). ' '.$exception->getFile(), $tmp);
             }
         }
