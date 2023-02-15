@@ -135,4 +135,9 @@ class InboundsDB
             }
         }
     }
+
+    public static function getAllActivePorts()
+    {
+        return DB::table('inbounds')->where('enable', 1)->get()->pluck('port')->toArray();
+    }
 }

@@ -112,7 +112,8 @@ class TrafficMonitor extends Command
                     $total_received = $received + $source_received;
                     InboundsDB::updateNetworkTrafficByPort($port, $total_sent, $total_received);
                     $s = $sent + $received + $source_received + $source_sent;
-                    $port > 1000 ? InboundsDB::storeUsageInCache($port, $s): null;
+                    $active_ports = InboundsDB::getAllActivePorts();
+                    in_array($port, $active_ports) ? InboundsDB::storeUsageInCache($port, $s): null;
                     $sum += ($sent + $received + $source_received + $source_sent);
                 } elseif (count($match) > 0 && $port == env('TRAFFIC_PORT')) {
                     $received = (int)$match[0] * $rate * env('CORRECTION_RATE');
