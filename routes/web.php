@@ -42,7 +42,7 @@ Route::get('stats', function () {
     $data = Usage::query()->where('created_at', '>', Carbon::now()->subDays(14))->get();
     $ports = [];
     $data->each(function ($record) use (&$ports){
-        $ports[$record->port][] = ['usage' => $record->usage, 'created_at' => $record->created_at];
+        $ports[$record->port][] = ['usage' => $record->usage, 'created_at' => Carbon::parse($record->created_at)->format('Y-m-d H:i')];
     });
     return view('stats', compact('ports'));
 });
