@@ -27,7 +27,6 @@
     var datasets = [];
     const colors = ['red', 'blue', 'green', 'purple', 'black', 'orange', 'lime', 'cyan', 'pink', 'darkblue'];
     for (var port in ports) {
-        labels = [];
         usage = [];
         for (const record of ports[port]) {
             labels.push(record['created_at']);
