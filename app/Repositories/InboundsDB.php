@@ -24,7 +24,7 @@ class InboundsDB
                 ->update(['up' => $record->up + $sent,
                     'down' => $record->down + $received
                 ]);
-        }else{
+        } else {
             self::updateAllAvailableAccounts($sent, $received);
         }
     }
@@ -46,22 +46,35 @@ class InboundsDB
 
     public static function blockIp($ip, $port)
     {
-        shell_exec('sudo ufw deny from '. $ip .' to any port '. $port);
+        shell_exec('sudo ufw deny from ' . $ip . ' to any port ' . $port);
     }
 
     public static function releaseIp($ip, $port)
     {
-        shell_exec('sudo ufw allow from '. $ip .' to any port '. $port);
+        shell_exec('sudo ufw allow from ' . $ip . ' to any port ' . $port);
     }
 
-    public static function storeBlockedIP($ip, $port) {
+    public static function storeBlockedIP($ip, $port)
+    {
         if (Cache::has('blocked')) {
-           $data = Cache::get('blocked');
-           $data[$port][] = $ip;
-           Cache::forever('blocked', $data);
-        }else {
+            $data = Cache::get('blocked');
             $data[$port][] = $ip;
             Cache::forever('blocked', $data);
+        } else {
+            $data[$port][] = $ip;
+            Cache::forever('blocked', $data);
+        }
+    }
+
+    public static function storeUsageInCache($port, $usage)
+    {
+        if (Cache::has('usages')) {
+            $data = Cache::get('usages');
+            $data[$port] += $usage;
+            Cache::forever('usages', $data);
+        } else {
+            $data[$port] = $usage;
+            Cache::forever('usages', $data);
         }
     }
 
@@ -111,7 +124,7 @@ class InboundsDB
             $record = DB::table('ports')->where('port', $port)->first();
             if (is_null($record)) {
                 DB::table('ports')->insert(['port' => $port, 'ips' => serialize($ips)]);
-            }else {
+            } else {
                 $ips_arr = unserialize($record->ips);
                 $new_ips = array_values(array_unique(array_merge($ips_arr, $ips)));
                 DB::table('ports')->where('port', $port)->update(['ips' => serialize($new_ips)]);

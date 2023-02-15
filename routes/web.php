@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Usage;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -34,4 +36,13 @@ Route::get('status', function () {
     $active = $inbounds->where('enable', 1)->count();
     $inactive = $inbounds->where('enable', 0)->count();
     return compact('total', 'active', 'inactive');
+});
+
+Route::get('stats', function () {
+    $data = Usage::query()->where('created_at', '>', Carbon::now()->subDays(14))->get();
+    $ports = [];
+    $data->each(function ($record) use (&$ports){
+        $ports[$record->port][] = ['usage' => $record->usage, 'created_at' => $record->created_at];
+    });
+    return view('stats', compact('ports'));
 });
