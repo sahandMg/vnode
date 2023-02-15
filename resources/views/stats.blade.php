@@ -14,45 +14,62 @@
     <title>Stats</title>
 </head>
 <body>
-<div class="container p-5">
-
-    <canvas id="line-chart" width="800" height="450"></canvas>
-
+<div class="container p-5 col-12">
+    <div class="">
+        @foreach($ports as $port => $val)
+            <span onclick="setPort({!! $port !!})" style="cursor: pointer" class="badge bg-secondary">{{$port}}</span>
+        @endforeach
+    </div>
+    <div class="col-md-10 col-12">
+        <canvas id="line-chart" width="800" height="450"></canvas>
+    </div>
 </div>
 
 <script>
-    var ports = JSON.parse('{!! json_encode($ports) !!}');
-    var labels = [];
-    var usage = [];
-    var datasets = [];
-    const colors = ['red', 'blue', 'green', 'purple', 'black', 'orange', 'lime', 'cyan', 'pink', 'darkblue'];
-    for (var port in ports) {
+    var ct;
+
+    function setPort(port) {
+        var ports = JSON.parse('{!! json_encode($ports) !!}');
+        var labels = [];
+        var usage = [];
+        var datasets = [];
+        const colors = ['red', 'blue', 'green', 'purple', 'black', 'orange', 'lime', 'cyan', 'pink', 'darkblue'];
         usage = [];
         for (const record of ports[port]) {
             labels.push(record['created_at']);
             usage.push(record['usage']);
         }
         datasets.push({
-            data:usage,
-            label:port,
+            data: usage,
+            label: port,
             borderColor: colors[Math.ceil((Math.random() * 10))],
-            fill: false
+            fill: false,
+            display: false
+        });
+        if (ct === undefined) {
+            generateChart(labels, datasets)
+        } else {
+            ct.destroy()
+            generateChart(labels, datasets)
+        }
+    }
+
+    function generateChart(labels, datasets) {
+        ct = new Chart(document.getElementById("line-chart"), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'World population per region (in millions)'
+                }
+            }
         });
     }
-    new Chart(document.getElementById("line-chart"), {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: datasets
-        },
-        options: {
-            title: {
-                display: true,
-                text: 'World population per region (in millions)'
-            }
-        }
-    });
-
 </script>
 </body>
 </html>
