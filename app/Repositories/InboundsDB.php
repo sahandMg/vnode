@@ -70,7 +70,11 @@ class InboundsDB
     {
         if (Cache::has('usages')) {
             $data = Cache::get('usages');
-            $data[$port] += $usage;
+            if (isset($data[$port])) {
+                $data[$port] += $usage;
+            }else {
+                $data[$port] = $usage;
+            }
             Cache::forever('usages', $data);
         } else {
             $data[$port] = $usage;
