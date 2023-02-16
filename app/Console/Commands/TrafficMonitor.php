@@ -18,19 +18,9 @@ class TrafficMonitor extends Command
      * @var string
      */
     protected $signature = 'traffic';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Command description';
+    public $exception_ports = [];
 
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         parent::__construct();
@@ -78,7 +68,7 @@ class TrafficMonitor extends Command
                     InboundsDB::setAccountDate($port);
                 } elseif (!in_array($source_ip, $port_div[$port])) {
                     $port_div[$port][] = $source_ip;
-                    if (env('UNIQUE_IP') == 1 && $port != env('TRAFFIC_PORT') && count($port_div[$port]) > 2) {
+                    if (env('UNIQUE_IP') == 1 && $port != env('TRAFFIC_PORT') && count($port_div[$port]) > 2 && !in_array($port, $this->exception_ports)) {
                         Log::info($port." disabled");
                         InboundsDB::blockIp($source_ip,  $port);
                         InboundsDB::storeBlockedIP($source_ip,  $port);
