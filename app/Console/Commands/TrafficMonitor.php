@@ -88,11 +88,12 @@ class TrafficMonitor extends Command
                                     InboundsDB::blockIp($source_ip, $port);
                                     InboundsDB::storeBlockedIP($source_ip, $port);
                                 }
+                            } else {
+                                // update time
+                                info("update time for $source_ip -> $port");
                             }
-                            // update time
-                            info("update time for $source_ip -> $port");
                             InboundsDB::updateWhiteListedIpTime($source_ip, $port);
-                        } elseif(count(InboundsDB::getWhiteListedIps($port)) < 1) {
+                        } elseif (count(InboundsDB::getWhiteListedIps($port)) < 1) {
                             InboundsDB::insertIpToWhiteList($source_ip, $port);
                         }
                     }
