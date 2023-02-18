@@ -44,8 +44,8 @@ class TrafficMonitor extends Command
 //        $txt = Cache::get('traffic');
 
 //        Add theses lines to cronttab -e
- //* * * * * php /var/www/html/vnode/artisan traffic
- //* * * * * sleep 30; php /var/www/html/vnode/artisan traffic
+        //* * * * * php /var/www/html/vnode/artisan traffic
+        //* * * * * sleep 30; php /var/www/html/vnode/artisan traffic
         $txt = shell_exec("sudo iftop -P -n -N -t -s 25 -L 150");
         $t = array_filter(explode(PHP_EOL, $txt));
         $cumulative = array_splice($t, 7, 200);
@@ -68,10 +68,25 @@ class TrafficMonitor extends Command
                     InboundsDB::setAccountDate($port);
                 } elseif (!in_array($source_ip, $port_div[$port])) {
                     $port_div[$port][] = $source_ip;
-                    if (env('UNIQUE_IP') == 1 && $port != env('TRAFFIC_PORT') && count($port_div[$port]) > 2 && !in_array($port, $this->exception_ports)) {
-                        Log::info($port." disabled");
-                        InboundsDB::blockIp($source_ip,  $port);
-                        InboundsDB::storeBlockedIP($source_ip,  $port);
+                    if (env('UNIQUE_IP') == 1 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
+                        $state = InboundsDB::searchForWhiteListIps($source_ip, $port);
+                        if ($state) {
+                            // update time
+                            InboundsDB::updateWhiteListedIpTime($source_ip, $port);
+                        } elseif (count(InboundsDB::getWhiteListedIps($port)) > 2) {
+                            // check if whitelisted ip has updated recently or not
+                            if (InboundsDB::checkIfIpExpired($source_ip, $port)) {
+                                InboundsDB::removeIpFromWhiteList($source_ip, $port);
+                                InboundsDB::insertIpToWhiteList($ip, $port);
+                            } else {// or
+                                // block
+                                Log::info($port . " disabled");
+                                InboundsDB::blockIp($source_ip, $port);
+                                InboundsDB::storeBlockedIP($source_ip, $port);
+                            }
+                        } else {
+                            InboundsDB::insertIpToWhiteList($source_ip, $port);
+                        }
                     }
                 }
                 $usage = $tmp[6];
@@ -103,7 +118,7 @@ class TrafficMonitor extends Command
                     InboundsDB::updateNetworkTrafficByPort($port, $total_sent, $total_received);
                     $s = $sent + $received + $source_received + $source_sent;
                     $active_ports = InboundsDB::getAllActivePorts();
-                    in_array($port, $active_ports) ? InboundsDB::storeUsageInCache($port, $s): null;
+                    in_array($port, $active_ports) ? InboundsDB::storeUsageInCache($port, $s) : null;
                     $sum += ($sent + $received + $source_received + $source_sent);
                 } elseif (count($match) > 0 && $port == env('TRAFFIC_PORT')) {
                     $received = (int)$match[0] * $rate * env('CORRECTION_RATE');
@@ -113,7 +128,7 @@ class TrafficMonitor extends Command
             } catch (\Exception $exception) {
                 Log::info($tmp);
                 Log::info($cumulative);
-                Log::info('Error: ' . $exception->getMessage(). ' '.$exception->getLine(). ' '.$exception->getFile());
+                Log::info('Error: ' . $exception->getMessage() . ' ' . $exception->getLine() . ' ' . $exception->getFile());
 //                dd($exception->getMessage().' '. $exception->getLine(). ' '.$exception->getFile(), $tmp);
             }
         }

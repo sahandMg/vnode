@@ -66,13 +66,81 @@ class InboundsDB
         }
     }
 
+    public static function searchForWhiteListIps($source_ip, $port)
+    {
+        $whiteList_ips = self::getWhiteListedIps($port);
+        if (in_array($source_ip, $whiteList_ips)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static function getWhiteListedIps($port)
+    {
+        if (Cache::has('allowed')) {
+            if (isset(Cache::get('allowed')[$port])) {
+                return Cache::get('allowed')[$port];
+            }else {
+                Cache::forever('allowed',[$port => []]);
+                return [];
+            }
+        }else {
+            Cache::forever('allowed', []);
+            return [];
+        }
+    }
+
+    public static function insertIpToWhiteList($ip, $port)
+    {
+        if (Cache::has('allowed')) {
+            $data = Cache::get('allowed');
+            $data[$port][$ip] = Carbon::now();
+            Cache::forever('allowed', $data);
+        } else {
+            $data[$port][$ip] = Carbon::now();
+            Cache::forever('allowed', $data);
+        }
+    }
+
+    public static function removeIpFromWhiteList($ip, $port)
+    {
+        $data = Cache::get('allowed');
+        if (isset($data[$port][$ip])) {
+            unset($data[$port][$ip]);
+        }
+    }
+
+    public static function updateWhiteListedIpTime($ip, $port)
+    {
+        $data = Cache::get('allowed');
+        $data[$port][$ip] = Carbon::now();
+        Cache::forever('allowed', $data);
+    }
+
+    public static function checkIfIpExpired($ip, $port)
+    {
+        $data = Cache::get('allowed');
+        $date = $data[$port][$ip];
+        if (Carbon::now()->diffInMinutes($date) > 5) {
+            return true;
+        }
+        return false;
+    }
+
+    private static function _getBlockedIps($port)
+    {
+        if (Cache::has('blocked')) {
+            return Cache::get('blocked')[$port];
+        }
+    }
+
     public static function storeUsageInCache($port, $usage)
     {
         if (Cache::has('usages')) {
             $data = Cache::get('usages');
             if (isset($data[$port])) {
                 $data[$port] += $usage;
-            }else {
+            } else {
                 $data[$port] = $usage;
             }
             Cache::forever('usages', $data);
