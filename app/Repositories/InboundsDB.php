@@ -78,10 +78,10 @@ class InboundsDB
     public static function getWhiteListedIps($port)
     {
         if (Cache::has('allowed')) {
-            if (isset(Cache::get('allowed')[$port])) {
+            $data = Cache::get('allowed');
+            if (isset($data[$port])) {
                 return Cache::get('allowed')[$port];
             }else {
-                $data = Cache::get('allowed');
                 $data[$port] = [];
                 Cache::forever('allowed', $data);
                 return [];
