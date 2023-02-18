@@ -71,6 +71,8 @@ class TrafficMonitor extends Command
                     if (env('UNIQUE_IP') == 1 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
                         info("searching for $source_ip -> $port");
                         $state = InboundsDB::searchForWhiteListIps($source_ip, $port);
+                        info($state);
+                        info(print_r(InboundsDB::getWhiteListedIps($port)));
                         if ($state) {
                             info("ip is available for $source_ip -> $port");
                             if (count(InboundsDB::getWhiteListedIps($port)) > 1) {
