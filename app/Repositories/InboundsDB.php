@@ -96,7 +96,7 @@ class InboundsDB
     {
         if (Cache::has('allowed')) {
             $data = Cache::get('allowed');
-            $data[$port][] = Carbon::now();
+            $data[$port][$ip] = Carbon::now();
             Cache::forever('allowed', $data);
         } else {
             $data[$port][$ip] = Carbon::now();
