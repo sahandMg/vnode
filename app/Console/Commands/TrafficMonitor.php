@@ -90,7 +90,7 @@ class TrafficMonitor extends Command
                             // update time
                             info("update time for $source_ip -> $port");
                             InboundsDB::updateWhiteListedIpTime($source_ip, $port);
-                        } else {
+                        } elseif(count(InboundsDB::getWhiteListedIps($port)) < 2) {
                             InboundsDB::insertIpToWhiteList($source_ip, $port);
                         }
                     }
