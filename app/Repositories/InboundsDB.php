@@ -85,7 +85,7 @@ class InboundsDB
                 return [];
             }
         }else {
-            Cache::forever('allowed', []);
+            Cache::forever('allowed',[$port => []]);
             return [];
         }
     }
