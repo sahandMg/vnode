@@ -81,7 +81,9 @@ class InboundsDB
             if (isset(Cache::get('allowed')[$port])) {
                 return Cache::get('allowed')[$port];
             }else {
-                Cache::forever('allowed',[$port => []]);
+                $data = Cache::get('allowed');
+                $data[$port] = [];
+                Cache::forever('allowed', $data);
                 return [];
             }
         }else {
@@ -94,7 +96,7 @@ class InboundsDB
     {
         if (Cache::has('allowed')) {
             $data = Cache::get('allowed');
-            $data[$port][$ip] = Carbon::now();
+            $data[$port][] = Carbon::now();
             Cache::forever('allowed', $data);
         } else {
             $data[$port][$ip] = Carbon::now();
