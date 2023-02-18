@@ -72,22 +72,23 @@ class TrafficMonitor extends Command
                         info("searching for $source_ip -> $port");
                         $state = InboundsDB::searchForWhiteListIps($source_ip, $port);
                         if ($state) {
+                            if (count(InboundsDB::getWhiteListedIps($port)) > 2) {
+                                // check if whitelisted ip has updated recently or not
+                                if (InboundsDB::checkIfIpExpired($source_ip, $port)) {
+                                    InboundsDB::removeIpFromWhiteList($port);
+                                    info("insert $source_ip -> $port");
+                                    InboundsDB::insertIpToWhiteList($source_ip, $port);
+                                } else {// or
+                                    // block
+                                    Log::info($port . " disabled");
+                                    info("block $source_ip -> $port");
+                                    InboundsDB::blockIp($source_ip, $port);
+                                    InboundsDB::storeBlockedIP($source_ip, $port);
+                                }
+                            }
                             // update time
                             info("update time for $source_ip -> $port");
                             InboundsDB::updateWhiteListedIpTime($source_ip, $port);
-                        } elseif (count(InboundsDB::getWhiteListedIps($port)) > 2) {
-                            // check if whitelisted ip has updated recently or not
-                            if (InboundsDB::checkIfIpExpired($source_ip, $port)) {
-                                InboundsDB::removeIpFromWhiteList($port);
-                                info("insert $source_ip -> $port");
-                                InboundsDB::insertIpToWhiteList($source_ip, $port);
-                            } else {// or
-                                // block
-                                Log::info($port . " disabled");
-                                info("block $source_ip -> $port");
-                                InboundsDB::blockIp($source_ip, $port);
-                                InboundsDB::storeBlockedIP($source_ip, $port);
-                            }
                         } else {
                             InboundsDB::insertIpToWhiteList($source_ip, $port);
                         }
