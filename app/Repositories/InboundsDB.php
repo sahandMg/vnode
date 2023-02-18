@@ -102,11 +102,13 @@ class InboundsDB
         }
     }
 
-    public static function removeIpFromWhiteList($ip, $port)
+    public static function removeIpFromWhiteList($port)
     {
         $data = Cache::get('allowed');
-        if (isset($data[$port][$ip])) {
-            unset($data[$port][$ip]);
+        foreach ($data[$port] as $ip => $date) {
+            if (Carbon::now()->diffInMinutes($date) > config('bot.expire_after')) {
+                unset($data[$port][$ip]);
+            }
         }
     }
 
@@ -121,7 +123,7 @@ class InboundsDB
     {
         $data = Cache::get('allowed');
         $date = $data[$port][$ip];
-        if (Carbon::now()->diffInMinutes($date) > 5) {
+        if (Carbon::now()->diffInMinutes($date) > config('bot.expire_after')) {
             return true;
         }
         return false;
