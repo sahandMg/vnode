@@ -72,6 +72,7 @@ class TrafficMonitor extends Command
                         info("searching for $source_ip -> $port");
                         $state = InboundsDB::searchForWhiteListIps($source_ip, $port);
                         if ($state) {
+                            info("ip is available for $source_ip -> $port");
                             if (count(InboundsDB::getWhiteListedIps($port)) > 2) {
                                 // check if whitelisted ip has updated recently or not
                                 if (InboundsDB::checkIfIpExpired($source_ip, $port)) {
