@@ -69,6 +69,7 @@ class TrafficMonitor extends Command
                 } elseif (!in_array($source_ip, $port_div[$port])) {
                     $port_div[$port][] = $source_ip;
                     if (env('UNIQUE_IP') == 1 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
+                        info("searching for $source_ip -> $port");
                         $state = InboundsDB::searchForWhiteListIps($source_ip, $port);
                         if ($state) {
                             // update time
