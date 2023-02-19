@@ -58,15 +58,17 @@ class InboundsDB
     {
         if (Cache::has('blocked')) {
             $data = Cache::get('blocked');
-            $data[$port][] = $ip;
-            Cache::forever('blocked', $data);
+            if (!in_array($ip, $data[$port])) {
+                $data[$port][] = $ip;
+                Cache::forever('blocked', $data);
+            }
         } else {
             $data[$port][] = $ip;
             Cache::forever('blocked', $data);
         }
     }
 
-    public static function searchForWhiteListIps($source_ip, $port)
+    public static function checkIfIpIsWhiteListed($source_ip, $port)
     {
         $whiteList_ips = self::getWhiteListedIps($port);
         if (in_array($source_ip, $whiteList_ips)) {
@@ -81,13 +83,13 @@ class InboundsDB
             $data = Cache::get('allowed');
             if (isset($data[$port])) {
                 return Cache::get('allowed')[$port];
-            }else {
+            } else {
                 $data[$port] = [];
                 Cache::forever('allowed', $data);
                 return [];
             }
-        }else {
-            Cache::forever('allowed',[]);
+        } else {
+            Cache::forever('allowed', []);
             return [];
         }
     }
@@ -131,10 +133,22 @@ class InboundsDB
         return false;
     }
 
-    private static function _getBlockedIps($port)
+    public static function checkIfIpBlocked($ip)
+    {
+        $blocked_ips = self::_getBlockedIps();
+        if (in_array($ip, $blocked_ips)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static function _getBlockedIps()
     {
         if (Cache::has('blocked')) {
-            return Cache::get('blocked')[$port];
+            return Cache::get('blocked');
+        } else {
+            Cache::forever('blocked', []);
+            return [];
         }
     }
 
