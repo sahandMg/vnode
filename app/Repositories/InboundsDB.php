@@ -116,7 +116,7 @@ class InboundsDB
         $sign = false;
         $data = Cache::get('allowed');
         foreach ($data[$port] as $ip => $date) {
-            if (Carbon::now()->diffInMinutes($date) > config('bot.expire_after')) {
+            if (Carbon::now()->diffInMinutes($date) >= config('bot.expire_after')) {
                 unset($data[$port][$ip]);
                 Cache::forever('allowed', $data);
                 $sign = true;
