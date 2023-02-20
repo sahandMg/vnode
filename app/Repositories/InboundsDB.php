@@ -58,20 +58,25 @@ class InboundsDB
     {
         if (Cache::has('blocked')) {
             $data = Cache::get('blocked');
-            if (!in_array($ip, $data[$port])) {
+            if (isset($data[$port])) {
+                if (!in_array($ip, $data[$port])) {
+                    $data[$port][] = $ip;
+                    Cache::forever('blocked', $data);
+                }
+            } else {
                 $data[$port][] = $ip;
                 Cache::forever('blocked', $data);
             }
         } else {
-            $data[$port][] = $ip;
-            Cache::forever('blocked', $data);
+            Cache::forever('blocked', []);
         }
     }
 
     public static function checkIfIpIsWhiteListed($source_ip, $port)
     {
         $whiteList_ips = self::getWhiteListedIps($port);
-        if (in_array($source_ip, $whiteList_ips)) {
+        info(json_encode($whiteList_ips));
+        if (in_array($source_ip, array_keys($whiteList_ips))) {
             return true;
         }
         return false;
@@ -108,12 +113,16 @@ class InboundsDB
 
     public static function removeIpFromWhiteList($port)
     {
+        $sign = false;
         $data = Cache::get('allowed');
         foreach ($data[$port] as $ip => $date) {
             if (Carbon::now()->diffInMinutes($date) > config('bot.expire_after')) {
                 unset($data[$port][$ip]);
+                Cache::forever('allowed', $data);
+                $sign = true;
             }
         }
+        return $sign;
     }
 
     public static function updateWhiteListedIpTime($ip, $port)
@@ -123,14 +132,9 @@ class InboundsDB
         Cache::forever('allowed', $data);
     }
 
-    public static function checkIfIpExpired($ip, $port)
+    public static function checkIfAnyIpExpired($port)
     {
-        $data = Cache::get('allowed');
-        $date = $data[$port][$ip];
-        if (Carbon::now()->diffInMinutes($date) > config('bot.expire_after')) {
-            return true;
-        }
-        return false;
+        return self::removeIpFromWhiteList($port);
     }
 
     public static function checkIfIpBlocked($ip)
