@@ -31,7 +31,7 @@ class InboundsDB
 
     public static function getAllPorts()
     {
-        return DB::table('inbounds')->where('enable', 1)->pluck('port')->toArray();
+        return DB::table('inbounds')->pluck('port')->toArray();
     }
 
     public static function getAllInbounds()
