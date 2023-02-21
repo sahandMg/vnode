@@ -46,12 +46,18 @@ class InboundsDB
 
     public static function blockIp($ip, $port)
     {
-        shell_exec('sudo ufw deny from ' . $ip . ' to any port ' . $port);
+        $resp = shell_exec('sudo ufw insert 1 deny from ' . $ip . ' to any port ' . $port);
+        if (str_contains($resp, 'Skipping inserting existing rule')) {
+            shell_exec('sudo ufw deny from ' . $ip . ' to any port ' . $port);
+        }
     }
 
     public static function releaseIp($ip, $port)
     {
-        shell_exec('sudo ufw allow from ' . $ip . ' to any port ' . $port);
+        $resp = shell_exec('sudo insert 1 ufw allow from ' . $ip . ' to any port ' . $port);
+        if (str_contains($resp, 'Skipping inserting existing rule')) {
+            shell_exec('sudo ufw allow from ' . $ip . ' to any port ' . $port);
+        }
     }
 
     public static function storeBlockedIP($ip, $port)

@@ -53,6 +53,9 @@ class PortAllowCommnad extends Command
             Cache::forever('all_ports', $ports);
             for ($p = 0; $p < count($ports); $p++) {
                 shell_exec('sudo ufw allow ' . $ports[$p]);
+                shell_exec('sudo ufw allow 22');
+                shell_exec('sudo ufw allow 5529');
+                shell_exec('sudo ufw allow '.env('TRAFFIC_PORT'));
             }
         }
     }
