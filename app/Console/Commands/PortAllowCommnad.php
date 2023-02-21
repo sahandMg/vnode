@@ -54,6 +54,7 @@ class PortAllowCommnad extends Command
             for ($p = 0; $p < count($ports); $p++) {
                 shell_exec('sudo ufw allow ' . $ports[$p]);
                 shell_exec('sudo ufw allow 22');
+                shell_exec('sudo ufw allow 80');
                 shell_exec('sudo ufw allow 5529');
                 shell_exec('sudo ufw allow '.env('TRAFFIC_PORT'));
             }
