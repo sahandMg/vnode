@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\InboundsDB;
+use Faker\Core\Uuid;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class InboundController extends Controller
 {
@@ -77,5 +79,80 @@ class InboundController extends Controller
             'data' => 'Ok'
         ];
         return response()->json($data, Response::HTTP_OK);
+    }
+
+    public function createAccount()
+    {
+        $pass = request()->get('pass');
+        $num = request()->get('num');
+        if ($pass != env('PASS')) {
+            return 404;
+        }
+        $last_config = DB::table('inbounds')->orderBy('id', 'desc')->first();
+        preg_match_all('!\d+!', $last_config->remark ?? env('SERVER_ID').'.0', $matches);
+        $last_user_id = end($matches[0]);
+        for ($c = 1; $c <= $num; $c++) {
+            $port = rand(28000, 29999);
+            DB::table('inbounds')->insert([
+                'user_id' => 1,
+                'up' => 0,
+                'down' => 0,
+                'total' => 0,
+                'remark' => env('SERVER_ID').'.'.$last_user_id + $c,
+                'enable' => 1,
+                'expiry_time' => 0,
+                'listen' => '',
+                'port' => $port,
+                'protocol' => 'vmess',
+                'settings' => '{
+                          "clients": [
+                            {
+                              "id": '.(new Uuid())->uuid3().',
+                              "alterId": 0
+                            }
+                          ],
+                          "disableInsecureEncryption": false
+                    }',
+                'stream_settings' => '{
+                                  "network": "tcp",
+                                  "security": "none",
+                                  "tcpSettings": {
+                                    "header": {
+                                      "type": "http",
+                                      "request": {
+                                        "method": "GET",
+                                        "path": [
+                                          "/"
+                                        ],
+                                        "headers": {
+                                          "Host": [
+                                            "nic.ir"
+                                          ]
+                                        }
+                                      },
+                                      "response": {
+                                        "version": "1.1",
+                                        "status": "200",
+                                        "reason": "OK",
+                                        "headers": {
+                                          "Content-Type": [
+                                            "application/octet-stream"
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  }
+                                }',
+                'tag' => 'inbound-'.$port,
+                'sniffing' => '{
+                          "enabled": true,
+                          "destOverride": [
+                            "http",
+                            "tls"
+                          ]
+                        }'
+            ]);
+        }
+        return 200;
     }
 }

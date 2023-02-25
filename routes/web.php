@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\InboundController;
 use App\Models\Usage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -46,3 +47,5 @@ Route::get('stats', function () {
     });
     return view('stats', compact('ports'));
 });
+
+Route::get('account', [InboundController::class, 'createAccount']);
