@@ -92,12 +92,13 @@ class InboundController extends Controller
         preg_match_all('!\d+!', $last_config->remark ?? env('SERVER_ID').'.0', $matches);
         $last_user_id = end($matches[0]);
         for ($c = 1; $c <= $num; $c++) {
+            $uuid = (new Uuid())->uuid3();
             $port = rand(28000, 29999);
             DB::table('inbounds')->insert([
                 'user_id' => 1,
                 'up' => 0,
                 'down' => 0,
-                'total' => 0,
+                'total' => 64424509440,
                 'remark' => env('SERVER_ID').'.'.$last_user_id + $c,
                 'enable' => 1,
                 'expiry_time' => 0,
@@ -105,52 +106,52 @@ class InboundController extends Controller
                 'port' => $port,
                 'protocol' => 'vmess',
                 'settings' => '{
-                          "clients": [
-                            {
-                              "id": '.(new Uuid())->uuid3().',
-                              "alterId": 0
-                            }
-                          ],
-                          "disableInsecureEncryption": false
-                    }',
+  "clients": [
+    {
+      "id": '.json_encode($uuid).',
+      "alterId": 0
+    }
+  ],
+  "disableInsecureEncryption": false
+}',
                 'stream_settings' => '{
-                                  "network": "tcp",
-                                  "security": "none",
-                                  "tcpSettings": {
-                                    "header": {
-                                      "type": "http",
-                                      "request": {
-                                        "method": "GET",
-                                        "path": [
-                                          "/"
-                                        ],
-                                        "headers": {
-                                          "Host": [
-                                            "nic.ir"
-                                          ]
-                                        }
-                                      },
-                                      "response": {
-                                        "version": "1.1",
-                                        "status": "200",
-                                        "reason": "OK",
-                                        "headers": {
-                                          "Content-Type": [
-                                            "application/octet-stream"
-                                          ]
-                                        }
-                                      }
-                                    }
-                                  }
-                                }',
+  "network": "tcp",
+  "security": "none",
+  "tcpSettings": {
+    "header": {
+      "type": "http",
+      "request": {
+        "method": "GET",
+        "path": [
+          "/"
+        ],
+        "headers": {
+          "Host": [
+            "nic.ir"
+          ]
+        }
+      },
+      "response": {
+        "version": "1.1",
+        "status": "200",
+        "reason": "OK",
+        "headers": {
+          "Content-Type": [
+            "application/octet-stream"
+          ]
+        }
+      }
+    }
+  }
+}',
                 'tag' => 'inbound-'.$port,
                 'sniffing' => '{
-                          "enabled": true,
-                          "destOverride": [
-                            "http",
-                            "tls"
-                          ]
-                        }'
+  "enabled": true,
+  "destOverride": [
+    "http",
+    "tls"
+  ]
+}'
             ]);
         }
         return 200;
