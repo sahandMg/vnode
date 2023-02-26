@@ -127,7 +127,7 @@ class InboundController extends Controller
         ],
         "headers": {
           "Host": [
-            "nic.ir"
+            "soft98.ir"
           ]
         }
       },
