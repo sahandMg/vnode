@@ -43,7 +43,7 @@ class CheckAccountState extends Command
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_TIMEOUT => 0,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_POSTFIELDS => json_encode(['data' => $data]),
+            CURLOPT_POSTFIELDS => $data,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
         ));
