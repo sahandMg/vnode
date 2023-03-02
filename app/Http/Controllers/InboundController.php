@@ -56,6 +56,7 @@ class InboundController extends Controller
         }
         $vol = (\request()->get('vol') ?? 0) * pow(10, 9);
         InboundsDB::updateUserVol($inbound->remark, $vol);
+        info('increasing'. $inbound->remark. ' vol for '.$vol.' GB');
         $data = [
             'status' => Response::HTTP_OK,
             'data' => 'Ok'
