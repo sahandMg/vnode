@@ -145,7 +145,9 @@ class TrafficMonitor extends Command
                     Log::info("Traffic usage for $ip:$port: sent: $sent & received: $received");
                     $total_sent = $sent + $source_sent;
                     $total_received = $received + $source_received;
-                    InboundsDB::updateNetworkTrafficByPort($port, $total_sent, $total_received);
+                    if (env('STATS') == 1) {
+                        InboundsDB::updateNetworkTrafficByPort($port, $total_sent, $total_received);
+                    }
                     $s = $sent + $received + $source_received + $source_sent;
                     $active_ports = InboundsDB::getAllActivePorts();
                     in_array($port, $active_ports) ? InboundsDB::storeUsageInCache($port, $s) : null;
@@ -153,7 +155,9 @@ class TrafficMonitor extends Command
                 } elseif (count($match) > 0 && $port == env('TRAFFIC_PORT')) {
                     $received = (int)$match[0] * $rate * env('CORRECTION_RATE');
                     $sent = (int)($match[0] / 10) * $rate * env('CORRECTION_RATE');
-                    InboundsDB::updateAllAvailableAccounts($sent, $received);
+                    if (env('STATS') == 1) {
+                        InboundsDB::updateAllAvailableAccounts($sent, $received);
+                    }
                 }
             } catch (\Exception $exception) {
                 Log::info($tmp);
