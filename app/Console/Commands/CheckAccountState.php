@@ -37,7 +37,7 @@ class CheckAccountState extends Command
     {
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => config('bot.master_node'),
+            CURLOPT_URL => config('bot.bot_node'),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
