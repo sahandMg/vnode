@@ -20,24 +20,32 @@ class CheckAccountState extends Command
     public function handle()
     {
         $accounts = DB::table('inbounds')->where('enable', 1)->get();
-        $remarks = [];
+        $expireis = [];
+        $vols = [];
         foreach ($accounts as $account) {
             $expiry_time = Carbon::createFromTimestampMs($account->expiry_time);
             if (Carbon::now()->diffInDays($expiry_time) == 1) {
-                $remarks[] = $account->remark;
+                $expireis[] = $account->remark;
+            }
+            if ($account->total * 0.9 < ($account->up + $account->down)) {
+                $vols[] = $account->remark;
             }
         }
-        if (count($remarks) > 0) {
-            $remarks[] = 'Hey Delain!';
-            $this->_sendHttp($remarks);
+        if (count($expireis) > 0) {
+            $expireis[] = 'Hey Delain!';
+            $this->_sendHttp($expireis, config('bot.bot_node_exp'));
+        }
+        if (count($vols) > 0) {
+            $expireis[] = 'Hey Delain!';
+            $this->_sendHttp($vols, config('bot.bot_node_vol'));
         }
     }
 
-    private function _sendHttp($data)
+    private function _sendHttp($data, $url)
     {
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => config('bot.bot_node'),
+            CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
