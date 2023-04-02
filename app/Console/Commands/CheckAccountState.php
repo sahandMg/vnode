@@ -36,7 +36,7 @@ class CheckAccountState extends Command
             $this->_sendHttp($expireis, config('bot.bot_node_exp'));
         }
         if (count($vols) > 0) {
-            $expireis[] = 'Hey Delain!';
+            $vols[] = 'Hey Delain!';
             $this->_sendHttp($vols, config('bot.bot_node_vol'));
         }
     }
