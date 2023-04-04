@@ -27,7 +27,7 @@ class CheckAccountState extends Command
             if (Carbon::now()->diffInDays($expiry_time) == 1) {
                 $expireis[] = $account->remark;
             }
-            if ($account->total * 0.9 < ($account->up + $account->down)) {
+            if ($account->total * 0.95 < ($account->up + $account->down)) {
                 $vols[] = $account->remark;
             }
         }
