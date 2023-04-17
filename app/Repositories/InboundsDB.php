@@ -205,9 +205,25 @@ class InboundsDB
 
     public static function updateExpiry($remark)
     {
+        $record = DB::table('inbounds')
+            ->where('remark', $remark)
+            ->first();
+        if ($record->total == 64424509440) {
+            $total = 64424509440;
+        } elseif($record->total > 64424509440) {
+            $total = $record->total - ($record->up + $record->down) < 64424509440
+                ? $record->total
+                : $record->total - ($record->up + $record->down) + 64424509440;
+        }
         DB::table('inbounds')
             ->where('remark', $remark)
-            ->update(['expiry_time' => Carbon::now()->addMonth()->getPreciseTimestamp(3)]);
+            ->update([
+                'expiry_time' => Carbon::now()->addMonth()->getPreciseTimestamp(3),
+                'enable' => 1,
+                'up' => 0,
+                'down' => 0,
+                'total' => $total
+            ]);
     }
 
     public static function setAccountDate($port)
