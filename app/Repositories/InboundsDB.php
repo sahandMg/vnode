@@ -211,7 +211,7 @@ class InboundsDB
         if ($record->total == 64424509440) {
             $total = 64424509440;
         } elseif($record->total > 64424509440) {
-            $total = $record->total - ($record->up + $record->down) < 64424509440
+            $total = $record->total - ($record->up + $record->down) > 64424509440
                 ? $record->total
                 : $record->total - ($record->up + $record->down) + 64424509440;
         }
