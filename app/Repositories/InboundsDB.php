@@ -218,7 +218,7 @@ class InboundsDB
         DB::table('inbounds')
             ->where('remark', $remark)
             ->update([
-                'expiry_time' => Carbon::now()->addMonth()->getPreciseTimestamp(3),
+                'expiry_time' => Carbon::now()->addDays(33)->getPreciseTimestamp(3),
                 'enable' => 1,
                 'up' => 0,
                 'down' => 0,
