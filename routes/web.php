@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
+    dd(shell_exec('sudo service x-ui stop'));
     return view('welcome');
 });
 

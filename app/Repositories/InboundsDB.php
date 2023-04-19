@@ -203,12 +203,14 @@ class InboundsDB
         DB::table('inbounds')
             ->where('remark', $remark)
             ->update(['total' => $inbound->total + $vol, 'enable' => 1]);
-        $update_url = config('bot.update_url') . $inbound->id;
         $inbound->enable = 1;
         $inbound->total = $inbound->total + $vol;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
-        shell_exec('sudo x-ui restart');
-        Http::sendHttp($update_url, $inbound_arr);
+        $user = UserDB::getUserData();
+        $login_url = config('bot.login_url').'?username='.$user->username.'&password='.$user->password;
+        $cookie = Http::sendHttpLogin($login_url);
+        $update_url = config('bot.update_url') . $inbound->id;
+        Http::sendHttp($update_url, $inbound_arr, ['Cookie:'. $cookie]);
         return $inbound;
     }
 
@@ -217,6 +219,7 @@ class InboundsDB
         $inbound = DB::table('inbounds')
             ->where('remark', $remark)
             ->first();
+        $total = 0;
         if ($inbound->total == 64424509440) {
             $total = 64424509440;
         } elseif ($inbound->total > 64424509440) {
@@ -240,9 +243,11 @@ class InboundsDB
         $inbound->up = 0;
         $inbound->expiry_time = $exp_date;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
+        $user = UserDB::getUserData();
+        $login_url = config('bot.login_url').'?username='.$user->username.'&password='.$user->password;
+        $cookie = Http::sendHttpLogin($login_url);
         $update_url = config('bot.update_url') . $inbound->id;
-        shell_exec('sudo x-ui restart');
-        Http::sendHttp($update_url, $inbound_arr);
+        Http::sendHttp($update_url, $inbound_arr, ['Cookie:'. $cookie]);
         return $inbound;
     }
 
@@ -258,9 +263,11 @@ class InboundsDB
             ]);
         $inbound->enable = 1;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
+        $user = UserDB::getUserData();
+        $login_url = config('bot.login_url').'?username='.$user->username.'&password='.$user->password;
+        $cookie = Http::sendHttpLogin($login_url);
         $update_url = config('bot.update_url') . $inbound->id;
-        shell_exec('sudo x-ui restart');
-        Http::sendHttp($update_url, $inbound_arr);
+        Http::sendHttp($update_url, $inbound_arr, ['Cookie:'. $cookie]);
         return $inbound;
     }
 

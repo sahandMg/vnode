@@ -79,7 +79,7 @@ class TrafficMonitor extends Command
                     $record = InboundsDB::getActiveUserByPort($port);
                     if (!is_null($record) && !in_array($record->remark, $remarks)) {
                         $remarks[] = $record->remark.' ip: '.$source_ip;
-                        InboundsDB::disableAccountByPort($port);
+//                        InboundsDB::disableAccountByPort($port);
                     }
                 }
 //                if (env('UNIQUE_IP') == 1 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
