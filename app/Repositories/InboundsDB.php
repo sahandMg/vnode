@@ -270,4 +270,9 @@ class InboundsDB
     {
         return DB::table('inbounds')->where('enable', 1)->get()->pluck('port')->toArray();
     }
+
+    public static function getUserByPort($port)
+    {
+        return DB::table('inbounds')->where('port', $port)->first();
+    }
 }

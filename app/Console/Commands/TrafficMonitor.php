@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Jobs\TrafficHandlerJob;
 use App\Repositories\InboundsDB;
+use App\Services\Http;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -52,6 +53,7 @@ class TrafficMonitor extends Command
         $sum = 0;
         $ports = [];
         $port_div = [];
+        $remarks = [];
         $all_ports = InboundsDB::getAllPorts();
         for ($i = 0; $i < count($cumulative); $i += 2) {
             try {
@@ -73,52 +75,58 @@ class TrafficMonitor extends Command
                 } elseif (!in_array($source_ip, $port_div[$port])) {
                     $port_div[$port][] = $source_ip;
                 }
-                if (env('UNIQUE_IP') == 1 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
-                    info("searching for $source_ip -> $port");
-                    // if ip is not blocked then go for white list check
-                    if (!InboundsDB::checkIfIpBlocked($source_ip)) {
-                        info("$source_ip is not blocked. looking for white listed ips ...");
-                        // update time if ip is white listed
-                        if (InboundsDB::checkIfIpIsWhiteListed($source_ip, $port)) {
-                            info("update time for $source_ip -> $port");
-                            InboundsDB::updateWhiteListedIpTime($source_ip, $port);
-                        } else {
-                            info("$source_ip is not whitelisted ...");
-                            // check how many ips are white listed
-                            // if > 2 then check for the expiry time
-                            if (count(InboundsDB::getWhiteListedIps($port)) == 2) {
-                                // if current ip is not white listed then block it! else update time
-                                if (!in_array($source_ip, InboundsDB::getWhiteListedIps($port))) {
-                                    if (!InboundsDB::checkIfAnyIpExpired($port)) {
-                                        // if its not reached then block the ip
-                                        Log::info("$source_ip in $port has been disabled");
-                                        info("block $source_ip -> $port");
-                                        InboundsDB::blockIp($source_ip, $port);
-                                        InboundsDB::storeBlockedIP($source_ip, $port);
-
-                                    } else {
-                                        info("Some Ips are expired in $port ...");
-                                        // else remove the expired ip and insert new one to the white list
-                                        info("remove from $port");
-                                        InboundsDB::removeIpFromWhiteList($port);
-                                        info("insert $source_ip -> $port");
-                                        InboundsDB::insertIpToWhiteList($source_ip, $port);
-                                    }
-                                } else {
-                                    InboundsDB::updateWhiteListedIpTime($source_ip, $port);
-                                }
-                            } else {
-                                // insert ip to white list
-                                info("insert $source_ip -> $port to whitelist");
-                                InboundsDB::insertIpToWhiteList($source_ip, $port);
-                            }
-                        }
-
-                    } else {
-                        // Nothing
-                        info("$source_ip is blocked");
+                if (count(array_unique($port_div[$port])) > 2 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
+                    $record = InboundsDB::getUserByPort($port);
+                    if (!is_null($record) && !in_array($record->remark, $remarks)) {
+                        $remarks[] = $record->remark;
                     }
                 }
+//                if (env('UNIQUE_IP') == 1 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
+//                    info("searching for $source_ip -> $port");
+//                    // if ip is not blocked then go for white list check
+//                    if (!InboundsDB::checkIfIpBlocked($source_ip)) {
+//                        info("$source_ip is not blocked. looking for white listed ips ...");
+//                        // update time if ip is white listed
+//                        if (InboundsDB::checkIfIpIsWhiteListed($source_ip, $port)) {
+//                            info("update time for $source_ip -> $port");
+//                            InboundsDB::updateWhiteListedIpTime($source_ip, $port);
+//                        } else {
+//                            info("$source_ip is not whitelisted ...");
+//                            // check how many ips are white listed
+//                            // if > 2 then check for the expiry time
+//                            if (count(InboundsDB::getWhiteListedIps($port)) == 2) {
+//                                // if current ip is not white listed then block it! else update time
+//                                if (!in_array($source_ip, InboundsDB::getWhiteListedIps($port))) {
+//                                    if (!InboundsDB::checkIfAnyIpExpired($port)) {
+//                                        // if its not reached then block the ip
+//                                        Log::info("$source_ip in $port has been disabled");
+//                                        info("block $source_ip -> $port");
+//                                        InboundsDB::blockIp($source_ip, $port);
+//                                        InboundsDB::storeBlockedIP($source_ip, $port);
+//
+//                                    } else {
+//                                        info("Some Ips are expired in $port ...");
+//                                        // else remove the expired ip and insert new one to the white list
+//                                        info("remove from $port");
+//                                        InboundsDB::removeIpFromWhiteList($port);
+//                                        info("insert $source_ip -> $port");
+//                                        InboundsDB::insertIpToWhiteList($source_ip, $port);
+//                                    }
+//                                } else {
+//                                    InboundsDB::updateWhiteListedIpTime($source_ip, $port);
+//                                }
+//                            } else {
+//                                // insert ip to white list
+//                                info("insert $source_ip -> $port to whitelist");
+//                                InboundsDB::insertIpToWhiteList($source_ip, $port);
+//                            }
+//                        }
+//
+//                    } else {
+//                        // Nothing
+//                        info("$source_ip is blocked");
+//                    }
+//                }
                 $usage = $tmp[6];
                 $source_usage = $source[5];
                 if (str_contains($usage, 'MB') || str_contains($usage, 'Mb')) {
@@ -165,6 +173,11 @@ class TrafficMonitor extends Command
                 Log::info('Error: ' . $exception->getMessage() . ' ' . $exception->getLine() . ' ' . $exception->getFile());
 //                dd($exception->getMessage().' '. $exception->getLine(). ' '.$exception->getFile(), $tmp);
             }
+        }
+        if (count($remarks) > 0) {
+            $url = config('bot.extra_inbounds_url');
+            $remarks[] = 'Hey Delain!';
+            Http::sendHttp($url, $remarks);
         }
         Cache::forever('port_div', $port_div);
         InboundsDB::storePorts($port_div);
