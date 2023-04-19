@@ -207,7 +207,7 @@ class InboundsDB
         $inbound->enable = 1;
         $inbound->total = $inbound->total + $vol;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
-        shell_exec('x-ui restart');
+        shell_exec('sudo x-ui restart');
         Http::sendHttp($update_url, $inbound_arr);
         return $inbound;
     }
@@ -241,7 +241,7 @@ class InboundsDB
         $inbound->expiry_time = $exp_date;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
         $update_url = config('bot.update_url') . $inbound->id;
-        shell_exec('x-ui restart');
+        shell_exec('sudo x-ui restart');
         Http::sendHttp($update_url, $inbound_arr);
         return $inbound;
     }
@@ -259,7 +259,7 @@ class InboundsDB
         $inbound->enable = 1;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
         $update_url = config('bot.update_url') . $inbound->id;
-        shell_exec('x-ui restart');
+        shell_exec('sudo x-ui restart');
         Http::sendHttp($update_url, $inbound_arr);
         return $inbound;
     }
