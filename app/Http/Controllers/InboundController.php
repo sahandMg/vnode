@@ -59,7 +59,7 @@ class InboundController extends Controller
         info('increasing'. $inbound->remark. ' vol for '.$vol.' GB');
         $data = [
             'status' => Response::HTTP_OK,
-            'data' => $inbound->toArray()
+            'data' => $inbound
         ];
         return response()->json($data, Response::HTTP_OK);
     }
@@ -77,7 +77,7 @@ class InboundController extends Controller
         $inbound = InboundsDB::updateExpiry($inbound->remark);
         $data = [
             'status' => Response::HTTP_OK,
-            'data' => $inbound->toArray()
+            'data' => $inbound
         ];
         return response()->json($data, Response::HTTP_OK);
     }
