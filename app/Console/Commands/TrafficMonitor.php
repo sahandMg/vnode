@@ -78,7 +78,7 @@ class TrafficMonitor extends Command
                 if (count(array_unique($port_div[$port])) > 2 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
                     $record = InboundsDB::getActiveUserByPort($port);
                     if (!is_null($record) && !in_array($record->remark, $remarks)) {
-                        $remarks[] = $record->remark;
+                        $remarks[] = $record->remark.' ip: '.$source_ip;
                         InboundsDB::disableAccountByPort($port);
                     }
                 }
