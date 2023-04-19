@@ -271,8 +271,8 @@ class InboundsDB
         return DB::table('inbounds')->where('enable', 1)->get()->pluck('port')->toArray();
     }
 
-    public static function getUserByPort($port)
+    public static function getActiveUserByPort($port)
     {
-        return DB::table('inbounds')->where('port', $port)->first();
+        return DB::table('inbounds')->where('enable', 1)->where('port', $port)->first();
     }
 }
