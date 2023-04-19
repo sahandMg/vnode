@@ -203,13 +203,10 @@ class InboundsDB
         DB::table('inbounds')
             ->where('remark', $remark)
             ->update(['total' => $inbound->total + $vol, 'enable' => 1]);
-        $user = UserDB::getUserData();
-        $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
         $update_url = config('bot.update_url') . $inbound->id;
         $inbound->enable = 1;
         $inbound->total = $inbound->total + $vol;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
-        Http::sendHttp($login_url);
         Http::sendHttp($update_url, $inbound_arr);
         return $inbound;
     }
@@ -242,10 +239,7 @@ class InboundsDB
         $inbound->up = 0;
         $inbound->expiry_time = $exp_date;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
-        $user = UserDB::getUserData();
-        $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
         $update_url = config('bot.update_url') . $inbound->id;
-        Http::sendHttp($login_url);
         Http::sendHttp($update_url, $inbound_arr);
         return $inbound;
     }
