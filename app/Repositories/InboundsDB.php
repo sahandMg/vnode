@@ -5,6 +5,8 @@ namespace App\Repositories;
 
 
 use App\Models\Inbound;
+use App\Services\Http;
+use App\Services\Utils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -201,6 +203,14 @@ class InboundsDB
         DB::table('inbounds')
             ->where('remark', $remark)
             ->update(['total' => $inbound->total + $vol, 'enable' => 1]);
+        $user = UserDB::getUserData();
+        $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
+        $update_url = config('bot.update_url') . $inbound->id;
+        $inbound->enable = 1;
+        $inbound->total = $inbound->total + $vol;
+        $inbound_arr = Utils::prepareInboundForUpdate($inbound);
+        Http::sendHttp($login_url);
+        Http::sendHttp($update_url, $inbound_arr);
     }
 
     public static function updateExpiry($remark)
@@ -210,20 +220,32 @@ class InboundsDB
             ->first();
         if ($record->total == 64424509440) {
             $total = 64424509440;
-        } elseif($record->total > 64424509440) {
+        } elseif ($record->total > 64424509440) {
             $total = $record->total - ($record->up + $record->down) > 64424509440
                 ? $record->total
                 : $record->total - ($record->up + $record->down) + 64424509440;
         }
+        $exp_date = Carbon::now()->addDays(33)->getPreciseTimestamp(3);
         DB::table('inbounds')
             ->where('remark', $remark)
             ->update([
-                'expiry_time' => Carbon::now()->addDays(33)->getPreciseTimestamp(3),
+                'expiry_time' => $exp_date,
                 'enable' => 1,
                 'up' => 0,
                 'down' => 0,
                 'total' => $total
             ]);
+        $record->enable = 1;
+        $record->total = $total;
+        $record->down = 0;
+        $record->up = 0;
+        $record->expiry_time = $exp_date;
+        $record_arr = Utils::prepareInboundForUpdate($record);
+        $user = UserDB::getUserData();
+        $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
+        $update_url = config('bot.update_url') . $record->id;
+        Http::sendHttp($login_url);
+        Http::sendHttp($update_url, $record_arr);
     }
 
     public static function setAccountDate($port)
