@@ -211,19 +211,20 @@ class InboundsDB
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
         Http::sendHttp($login_url);
         Http::sendHttp($update_url, $inbound_arr);
+        return $inbound;
     }
 
     public static function updateExpiry($remark)
     {
-        $record = DB::table('inbounds')
+        $inbound = DB::table('inbounds')
             ->where('remark', $remark)
             ->first();
-        if ($record->total == 64424509440) {
+        if ($inbound->total == 64424509440) {
             $total = 64424509440;
-        } elseif ($record->total > 64424509440) {
-            $total = $record->total - ($record->up + $record->down) > 64424509440
-                ? $record->total
-                : $record->total - ($record->up + $record->down) + 64424509440;
+        } elseif ($inbound->total > 64424509440) {
+            $total = $inbound->total - ($inbound->up + $inbound->down) > 64424509440
+                ? $inbound->total
+                : $inbound->total - ($inbound->up + $inbound->down) + 64424509440;
         }
         $exp_date = Carbon::now()->addDays(33)->getPreciseTimestamp(3);
         DB::table('inbounds')
@@ -235,17 +236,18 @@ class InboundsDB
                 'down' => 0,
                 'total' => $total
             ]);
-        $record->enable = 1;
-        $record->total = $total;
-        $record->down = 0;
-        $record->up = 0;
-        $record->expiry_time = $exp_date;
-        $record_arr = Utils::prepareInboundForUpdate($record);
+        $inbound->enable = 1;
+        $inbound->total = $total;
+        $inbound->down = 0;
+        $inbound->up = 0;
+        $inbound->expiry_time = $exp_date;
+        $inbound_arr = Utils::prepareInboundForUpdate($inbound);
         $user = UserDB::getUserData();
         $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
-        $update_url = config('bot.update_url') . $record->id;
+        $update_url = config('bot.update_url') . $inbound->id;
         Http::sendHttp($login_url);
-        Http::sendHttp($update_url, $record_arr);
+        Http::sendHttp($update_url, $inbound_arr);
+        return $inbound;
     }
 
     public static function setAccountDate($port)

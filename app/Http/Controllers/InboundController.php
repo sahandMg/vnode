@@ -55,11 +55,11 @@ class InboundController extends Controller
             return response()->json($data, Response::HTTP_NOT_FOUND);
         }
         $vol = (\request()->get('vol') ?? 0) * pow(10, 9);
-        InboundsDB::updateUserVol($inbound->remark, $vol);
+        $inbound = InboundsDB::updateUserVol($inbound->remark, $vol);
         info('increasing'. $inbound->remark. ' vol for '.$vol.' GB');
         $data = [
             'status' => Response::HTTP_OK,
-            'data' => 'Ok'
+            'data' => $inbound->toArray()
         ];
         return response()->json($data, Response::HTTP_OK);
     }
@@ -74,10 +74,10 @@ class InboundController extends Controller
             ];
             return response()->json($data, Response::HTTP_NOT_FOUND);
         }
-        InboundsDB::updateExpiry($inbound->remark);
+        $inbound = InboundsDB::updateExpiry($inbound->remark);
         $data = [
             'status' => Response::HTTP_OK,
-            'data' => 'Ok'
+            'data' => $inbound->toArray()
         ];
         return response()->json($data, Response::HTTP_OK);
     }
