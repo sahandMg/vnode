@@ -157,4 +157,15 @@ class InboundController extends Controller
         }
         return 200;
     }
+
+    public function reconnectInbound()
+    {
+        $inbound = InboundsDB::getUserByRemark(\request()->get('remark'));
+        $inbound = InboundsDB::reconnect($inbound->remark);
+        $data = [
+            'status' => Response::HTTP_OK,
+            'data' => $inbound
+        ];
+        return response()->json($data, Response::HTTP_OK);
+    }
 }

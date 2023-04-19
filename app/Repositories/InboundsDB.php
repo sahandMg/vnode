@@ -244,6 +244,23 @@ class InboundsDB
         return $inbound;
     }
 
+    public static function reconnect($remark)
+    {
+        $inbound = DB::table('inbounds')
+            ->where('remark', $remark)
+            ->first();
+        DB::table('inbounds')
+            ->where('remark', $remark)
+            ->update([
+                'enable' => 1,
+            ]);
+        $inbound->enable = 1;
+        $inbound_arr = Utils::prepareInboundForUpdate($inbound);
+        $update_url = config('bot.update_url') . $inbound->id;
+        Http::sendHttp($update_url, $inbound_arr);
+        return $inbound;
+    }
+
     public static function setAccountDate($port)
     {
         $inbound = DB::table('inbounds')->where('port', $port)->where('expiry_time', 0)->first();
