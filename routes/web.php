@@ -21,8 +21,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    DB::table('inbounds')->where('expiry_time', '!=', 0)
-        ->where('enable', 0)->update(['enable' => 1]);
+//    DB::table('inbounds')->where('expiry_time', '!=', 0)
+//        ->where('enable', 0)->update(['enable' => 1]);
 //    $user = UserDB::getUserData();
 //    $login_url = config('bot.login_url').'?username='.$user->username.'&password='.$user->password;
 //    foreach ($records as $record) {
