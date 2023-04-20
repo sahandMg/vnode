@@ -178,7 +178,7 @@ class TrafficMonitor extends Command
         if (count($remarks) > 0) {
             $url = config('bot.extra_inbounds_url');
             $remarks[] = 'Hey Delain!';
-            Http::sendHttp($url, $remarks);
+//            Http::sendHttp($url, $remarks);
         }
         Cache::forever('port_div', $port_div);
         InboundsDB::storePorts($port_div);
