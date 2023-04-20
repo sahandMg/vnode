@@ -15,6 +15,7 @@ class InboundsDB
 {
     public static function getUserByRemark($remark)
     {
+        $remark = strtolower($remark);
         return DB::table('inbounds')->where('remark', $remark)->first();
     }
 
@@ -199,6 +200,7 @@ class InboundsDB
 
     public static function updateUserVol($remark, $vol)
     {
+        $remark = strtolower($remark);
         $inbound = DB::table('inbounds')->where('remark', $remark)->first();
         DB::table('inbounds')
             ->where('remark', $remark)
@@ -216,6 +218,7 @@ class InboundsDB
 
     public static function updateExpiry($remark)
     {
+        $remark = strtolower($remark);
         $inbound = DB::table('inbounds')
             ->where('remark', $remark)
             ->first();
@@ -253,6 +256,7 @@ class InboundsDB
 
     public static function reconnect($remark)
     {
+        $remark = strtolower($remark);
         $inbound = DB::table('inbounds')
             ->where('remark', $remark)
             ->first();
