@@ -75,7 +75,7 @@ class TrafficMonitor extends Command
                 } elseif (!in_array($source_ip, $port_div[$port])) {
                     $port_div[$port][] = $source_ip;
                 }
-                if (count(array_unique($port_div[$port])) > 3 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
+                if (count($port_div[$port]) > 3 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
                     $record = InboundsDB::getActiveUserByPort($port);
                     if (!is_null($record) && !in_array($record->remark, $remarks)) {
                         $remarks[] = $record->remark.' ip: '.$source_ip;

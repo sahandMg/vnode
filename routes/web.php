@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\InboundController;
 use App\Models\Usage;
+use App\Repositories\UserDB;
+use App\Services\Http;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +21,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    dd(shell_exec('sudo service x-ui stop'));
+    DB::table('inbounds')->where('expiry_time', '!=', 0)
+        ->where('enable', 0)->update(['enable' => 1]);
+//    $user = UserDB::getUserData();
+//    $login_url = config('bot.login_url').'?username='.$user->username.'&password='.$user->password;
+//    foreach ($records as $record) {
+//
+//        $cookie = Http::sendHttpLogin($login_url);
+//        $update_url = config('bot.update_url') . $inbound->id;
+//        Http::sendHttp($update_url, $inbound_arr, ['Cookie:'. $cookie]);
+//    }
     return view('welcome');
 });
 
