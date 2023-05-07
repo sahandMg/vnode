@@ -275,6 +275,27 @@ class InboundsDB
         return $inbound;
     }
 
+    public static function disconnect($remark)
+    {
+        $remark = strtolower($remark);
+        $inbound = DB::table('inbounds')
+            ->where('remark', $remark)
+            ->first();
+        DB::table('inbounds')
+            ->where('remark', $remark)
+            ->update([
+                'enable' => 0,
+            ]);
+        $inbound->enable = 0;
+        $inbound_arr = Utils::prepareInboundForUpdate($inbound);
+        $user = UserDB::getUserData();
+        $login_url = config('bot.login_url').'?username='.$user->username.'&password='.$user->password;
+        $cookie = Http::sendHttpLogin($login_url);
+        $update_url = config('bot.update_url') . $inbound->id;
+        Http::sendHttp($update_url, $inbound_arr, ['Cookie:'. $cookie]);
+        return $inbound;
+    }
+
     public static function setAccountDate($port)
     {
         $inbound = DB::table('inbounds')->where('port', $port)->where('expiry_time', 0)->first();

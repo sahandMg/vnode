@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('inbound', [InboundController::class, 'getInbound']);
 Route::post('inbound/reconnect', [InboundController::class, 'reconnectInbound']);
+Route::post('inbound/disconnect', [InboundController::class, 'disconnectInbound']);
 Route::post('inbound/all', [InboundController::class, 'getAllInbound']);
 Route::post('vol', [InboundController::class, 'addVol']);
 Route::post('expiry', [InboundController::class, 'addExpiry']);

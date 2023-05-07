@@ -168,4 +168,15 @@ class InboundController extends Controller
         ];
         return response()->json($data, Response::HTTP_OK);
     }
+
+    public function disconnectInbound()
+    {
+        $inbound = InboundsDB::getUserByRemark(\request()->get('remark'));
+        $inbound = InboundsDB::disconnect($inbound->remark);
+        $data = [
+            'status' => Response::HTTP_OK,
+            'data' => $inbound
+        ];
+        return response()->json($data, Response::HTTP_OK);
+    }
 }
