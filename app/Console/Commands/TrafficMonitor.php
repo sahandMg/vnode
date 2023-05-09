@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\TrafficHandlerJob;
+use App\Repositories\CacheDB;
 use App\Repositories\InboundsDB;
 use App\Services\Http;
 use Illuminate\Console\Command;
@@ -75,10 +76,11 @@ class TrafficMonitor extends Command
                 } elseif (!in_array($source_ip, $port_div[$port])) {
                     $port_div[$port][] = $source_ip;
                 }
-                if (count($port_div[$port]) > 3 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
+                if (count($port_div[$port]) > 2 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
                     $record = InboundsDB::getActiveUserByPort($port);
                     if (!is_null($record) && !in_array($record->remark, $remarks)) {
                         $remarks[] = $record->remark.' ip: '.$source_ip;
+                        CacheDB::storeExtraRemark($record->remark);
 //                        InboundsDB::disableAccountByPort($port);
                     }
                 }
