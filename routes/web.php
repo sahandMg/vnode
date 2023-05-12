@@ -60,6 +60,10 @@ Route::get('stats', function () {
     return view('stats', compact('ports'));
 });
 
+Route::get('remarks', function() {
+    return Cache::get('remarks');
+});
+
 Route::get('account', [InboundController::class, 'createAccount']);
 
 Route::get('transpiler', function () {
