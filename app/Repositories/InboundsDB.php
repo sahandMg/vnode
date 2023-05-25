@@ -234,7 +234,7 @@ class InboundsDB
         $exp_date = $agent == 'user' ?
             Carbon::now()->addDays(32)->getPreciseTimestamp(3)
             :
-            Carbon::now()->addDays(30)->getPreciseTimestamp(3);
+            Carbon::now()->addMonth()->getPreciseTimestamp(3);
         DB::table('inbounds')
             ->where('remark', $remark)
             ->update([
