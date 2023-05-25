@@ -230,7 +230,11 @@ class InboundsDB
                 ? $inbound->total
                 : $inbound->total - ($inbound->up + $inbound->down) + 64424509440;
         }
-        $exp_date = Carbon::now()->addDays(33)->getPreciseTimestamp(3);
+        $agent = request()->get('agent') ?? 'user';
+        $exp_date = $agent == 'user' ?
+            Carbon::now()->addDays(32)->getPreciseTimestamp(3)
+            :
+            Carbon::now()->getPreciseTimestamp(3);
         DB::table('inbounds')
             ->where('remark', $remark)
             ->update([
