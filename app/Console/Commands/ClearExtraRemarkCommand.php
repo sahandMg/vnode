@@ -40,15 +40,16 @@ class ClearExtraRemarkCommand extends Command
     {
         // send a request to joyvpn to inform admin of bad remarks
         $remarks = Cache::get('remarks');
+        $tmp = $remarks;
         foreach ($remarks as $i => $v) {
             if ($v < 1200) {
-                unset($remarks[$i]);
+                unset($tmp[$i]);
             } else {
                 // reduce vol to 1GB
             }
         }
-        $remarks[] = 'Hey Delain!';
-        $this->_sendHttp($remarks, config('bot.extra_inbounds_url'));
+        $tmp[] = 'Hey Delain!';
+        $this->_sendHttp($tmp, config('bot.extra_inbounds_url'));
         Cache::forget('remarks');
     }
 
