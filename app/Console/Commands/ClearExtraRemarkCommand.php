@@ -39,6 +39,33 @@ class ClearExtraRemarkCommand extends Command
     public function handle()
     {
         // send a request to joyvpn to inform admin of bad remarks
+        $remarks = Cache::get('remarks');
+        $remarks[] = 'Hey Delain!';
+        $this->_sendHttp($remarks, config('bot.extra_inbounds_url'));
         Cache::forget('remarks');
+    }
+
+    private function _sendHttp($data, $url)
+    {
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_POSTFIELDS => $data,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+        ));
+        $response = curl_exec($curl);
+        if (curl_errno($curl)) {
+            info(json_encode($response));
+            return response()->view('ask', ['error' => 'خطای node'])->throwResponse();
+        }
+        curl_close($curl);
+        info(json_encode($response));
+        return json_decode($response);
     }
 }
