@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\InboundController;
 use App\Models\Usage;
+use App\Repositories\InboundsDB;
 use App\Repositories\UserDB;
 use App\Services\Http;
 use Carbon\Carbon;
@@ -85,4 +86,13 @@ Route::get('transpiler', function () {
     $e = 'vmess://'.base64_encode(json_encode($t3));
     return $e;
     dd(base64_decode($t), base64_decode($t2));
+});
+
+Route::get('vol', function() {
+    $inbounds = InboundsDB::getAllInbounds();
+    $s = 0;
+    foreach ($inbounds as $inbound) {
+        $s += ($inbound->upload + $inbound->download) / $inbound->total * 100;
+    }
+    return $s / $inbounds->count();
 });
