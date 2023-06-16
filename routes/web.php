@@ -92,7 +92,12 @@ Route::get('vol', function() {
     $inbounds = InboundsDB::getAllInbounds();
     $s = 0;
     foreach ($inbounds as $inbound) {
-        $s += ($inbound->upload + $inbound->download) / $inbound->total * 100;
+
+        if ($inbound-> total !== 0) {
+            if ($inbound->up + $inbound->down < $inbound->total / 2) {
+                $s += 1;
+            }
+        }
     }
-    return $s / $inbounds->count();
+    return $s / $inbounds->count() * 100;
 });
