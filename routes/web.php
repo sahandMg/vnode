@@ -93,7 +93,7 @@ Route::get('vol', function() {
     $s = 0;
     foreach ($inbounds as $inbound) {
 
-        if ($inbound-> total !== 0) {
+        if ($inbound->total !== 0 && $inbound->down > 10^9) {
             if ($inbound->up + $inbound->down < $inbound->total / 2) {
                 $s += 1;
             }
