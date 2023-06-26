@@ -21,7 +21,7 @@ class ClearUsageCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'clearing usage data from cache';
 
     /**
      * Create a new command instance.

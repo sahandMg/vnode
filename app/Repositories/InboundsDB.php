@@ -10,6 +10,7 @@ use App\Services\Utils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Morilog\Jalali\Jalalian;
 
 class InboundsDB
 {
@@ -232,9 +233,9 @@ class InboundsDB
         }
         $agent = request()->get('agent') ?? 'user';
         $exp_date = $agent == 'user' ?
-            Carbon::now()->addDays(32)->getPreciseTimestamp(3)
+            Jalalian::now()->addMonths()->addDays(32)->toCarbon()->getPreciseTimestamp(3)
             :
-            Carbon::now()->addMonth()->getPreciseTimestamp(3);
+            Jalalian::now()->addMonths(1)->toCarbon()->getPreciseTimestamp(3);
         DB::table('inbounds')
             ->where('remark', $remark)
             ->update([
