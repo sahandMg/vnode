@@ -224,12 +224,17 @@ class InboundsDB
             ->where('remark', $remark)
             ->first();
         $total = 0;
-        if ($inbound->total == 64424509440) {
+        $base = 64424509440;
+        $used = $inbound->up + $inbound->down;
+        if ($inbound->total == $base) {
             $total = 64424509440;
-        } elseif ($inbound->total > 64424509440) {
-            $total = $inbound->total - ($inbound->up + $inbound->down) > 64424509440
-                ? $inbound->total
-                : $inbound->total - ($inbound->up + $inbound->down) + 64424509440;
+        } elseif ($inbound->total > $base && $used > $base) {
+            $remain = $used - $base;
+            $total = $remain + $base;
+        } elseif($inbound->total > $base && $used < $base) {
+            $total = $inbound->total;
+        } else {
+            $total = $inbound->total;
         }
         $agent = request()->get('agent') ?? 'user';
         $exp_date = $agent == 'user' ?
