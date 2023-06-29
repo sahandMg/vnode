@@ -228,8 +228,8 @@ class InboundsDB
         $used = $inbound->up + $inbound->down;
         if ($inbound->total == $base) {
             $total = 64424509440;
-        } elseif ($inbound->total > $base && $used > $base) {
-            $remain = $used - $base;
+        } elseif ($inbound->total > $base && $used >= $base) {
+            $remain = $inbound->total - $used ;
             $total = $remain + $base;
         } elseif($inbound->total > $base && $used < $base) {
             $total = $inbound->total;
