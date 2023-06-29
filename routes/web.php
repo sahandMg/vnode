@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Morilog\Jalali\Jalalian;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,4 +101,8 @@ Route::get('vol', function() {
         }
     }
     return $s / $inbounds->count() * 100;
+});
+
+Route::get('j', function () {
+    return Jalalian::now();
 });
