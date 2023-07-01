@@ -94,12 +94,13 @@ class InboundController extends Controller
         $last_user_id = end($matches[0]);
         $type = isset($_GET['type']) ? $_GET['type']: 'and';
         for ($c = 1; $c <= $num; $c++) {
+            $remark = env('SERVER_ID') . '.' . $last_user_id + $c;
             if ($type == 'and') {
-                DB::table('inbounds')->insert($this->_getAndroidConfig($last_user_id, $c));
+                DB::table('inbounds')->insert($this->_getAndroidConfig($remark));
             } else {
-                DB::table('inbounds')->insert($this->_getIosConfig($last_user_id, $c));
+                DB::table('inbounds')->insert($this->_getIosConfig($remark));
             }
-
+            $inbound = InboundsDB::reconnect($remark);
         }
         return 200;
     }
@@ -126,7 +127,7 @@ class InboundController extends Controller
         return response()->json($data, Response::HTTP_OK);
     }
 
-    private function _getAndroidConfig($last_user_id, $counter)
+    private function _getAndroidConfig($remark)
     {
         $uuid = (new Uuid())->uuid3();
         $port = rand(28000, 29999);
@@ -135,7 +136,7 @@ class InboundController extends Controller
             'up' => 0,
             'down' => 0,
             'total' => 64424509440,
-            'remark' => env('SERVER_ID') . '.' . $last_user_id + $counter,
+            'remark' => $remark,
             'enable' => 1,
             'expiry_time' => 0,
             'listen' => '',
@@ -191,7 +192,7 @@ class InboundController extends Controller
         ];
     }
 
-    private function _getIosConfig($last_user_id, $counter)
+    private function _getIosConfig($remark)
     {
         $uuid = (new Uuid())->uuid3();
         $port = rand(28000, 29999);
@@ -200,7 +201,7 @@ class InboundController extends Controller
             'up' => 0,
             'down' => 0,
             'total' => 64424509440,
-            'remark' => env('SERVER_ID') . '.' . $last_user_id + $counter,
+            'remark' => $remark,
             'enable' => 1,
             'expiry_time' => 0,
             'listen' => '',
