@@ -56,7 +56,7 @@ class InboundController extends Controller
         }
         $vol = (\request()->get('vol') ?? 0) * pow(10, 9);
         $inbound = InboundsDB::updateUserVol($inbound->remark, $vol);
-        info('increasing'. $inbound->remark. ' vol for '.$vol.' GB');
+        info('increasing' . $inbound->remark . ' vol for ' . $vol . ' GB');
         $data = [
             'status' => Response::HTTP_OK,
             'data' => $inbound
@@ -90,32 +90,67 @@ class InboundController extends Controller
             return 404;
         }
         $last_config = DB::table('inbounds')->orderBy('id', 'desc')->first();
-        preg_match_all('!\d+!', $last_config->remark ?? env('SERVER_ID').'.0', $matches);
+        preg_match_all('!\d+!', $last_config->remark ?? env('SERVER_ID') . '.0', $matches);
         $last_user_id = end($matches[0]);
+        $type = isset($_GET['type']) ? $_GET['type']: 'and';
         for ($c = 1; $c <= $num; $c++) {
-            $uuid = (new Uuid())->uuid3();
-            $port = rand(28000, 29999);
-            DB::table('inbounds')->insert([
-                'user_id' => 1,
-                'up' => 0,
-                'down' => 0,
-                'total' => 64424509440,
-                'remark' => env('SERVER_ID').'.'.$last_user_id + $c,
-                'enable' => 1,
-                'expiry_time' => 0,
-                'listen' => '',
-                'port' => $port,
-                'protocol' => 'vmess',
-                'settings' => '{
+            if ($type == 'and') {
+                DB::table('inbounds')->insert($this->_getAndroidConfig($last_user_id, $c));
+            } else {
+                DB::table('inbounds')->insert($this->_getIosConfig($last_user_id, $c));
+            }
+
+        }
+        return 200;
+    }
+
+    public function reconnectInbound()
+    {
+        $inbound = InboundsDB::getUserByRemark(\request()->get('remark'));
+        $inbound = InboundsDB::reconnect($inbound->remark);
+        $data = [
+            'status' => Response::HTTP_OK,
+            'data' => $inbound
+        ];
+        return response()->json($data, Response::HTTP_OK);
+    }
+
+    public function disconnectInbound()
+    {
+        $inbound = InboundsDB::getUserByRemark(\request()->get('remark'));
+        $inbound = InboundsDB::disconnect($inbound->remark);
+        $data = [
+            'status' => Response::HTTP_OK,
+            'data' => $inbound
+        ];
+        return response()->json($data, Response::HTTP_OK);
+    }
+
+    private function _getAndroidConfig($last_user_id, $counter)
+    {
+        $uuid = (new Uuid())->uuid3();
+        $port = rand(28000, 29999);
+        return [
+            'user_id' => 1,
+            'up' => 0,
+            'down' => 0,
+            'total' => 64424509440,
+            'remark' => env('SERVER_ID') . '.' . $last_user_id + $counter,
+            'enable' => 1,
+            'expiry_time' => 0,
+            'listen' => '',
+            'port' => $port,
+            'protocol' => 'vmess',
+            'settings' => '{
   "clients": [
     {
-      "id": '.json_encode($uuid).',
+      "id": ' . json_encode($uuid) . ',
       "alterId": 0
     }
   ],
   "disableInsecureEncryption": false
 }',
-                'stream_settings' => '{
+            'stream_settings' => '{
   "network": "tcp",
   "security": "none",
   "tcpSettings": {
@@ -145,38 +180,56 @@ class InboundController extends Controller
     }
   }
 }',
-                'tag' => 'inbound-'.$port,
-                'sniffing' => '{
+            'tag' => 'inbound-' . $port,
+            'sniffing' => '{
   "enabled": true,
   "destOverride": [
     "http",
     "tls"
   ]
 }'
-            ]);
-        }
-        return 200;
+        ];
     }
 
-    public function reconnectInbound()
+    private function _getIosConfig($last_user_id, $counter)
     {
-        $inbound = InboundsDB::getUserByRemark(\request()->get('remark'));
-        $inbound = InboundsDB::reconnect($inbound->remark);
-        $data = [
-            'status' => Response::HTTP_OK,
-            'data' => $inbound
-        ];
-        return response()->json($data, Response::HTTP_OK);
+        $uuid = (new Uuid())->uuid3();
+        $port = rand(28000, 29999);
+        return [
+            'user_id' => 1,
+            'up' => 0,
+            'down' => 0,
+            'total' => 64424509440,
+            'remark' => env('SERVER_ID') . '.' . $last_user_id + $counter,
+            'enable' => 1,
+            'expiry_time' => 0,
+            'listen' => '',
+            'port' => $port,
+            'protocol' => 'vmess',
+            'settings' => '{
+  "clients": [
+    {
+      "id": ' . json_encode($uuid) . ',
+      "alterId": 0
     }
-
-    public function disconnectInbound()
-    {
-        $inbound = InboundsDB::getUserByRemark(\request()->get('remark'));
-        $inbound = InboundsDB::disconnect($inbound->remark);
-        $data = [
-            'status' => Response::HTTP_OK,
-            'data' => $inbound
-        ];
-        return response()->json($data, Response::HTTP_OK);
+  ],
+  "disableInsecureEncryption": false
+}',
+            'stream_settings' => '{
+  "network": "ws",
+  "security": "none",
+  "wsSettings": {
+    "path": "/",
+    "headers": {}
+  }
+}',
+            'tag' => 'inbound-' . $port,
+            'sniffing' => '{
+  "enabled": true,
+  "destOverride": [
+    "http",
+    "tls"
+  ]
+}'];
     }
 }
