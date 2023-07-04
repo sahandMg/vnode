@@ -130,7 +130,7 @@ class InboundController extends Controller
     private function _getAndroidConfig($remark)
     {
         $uuid = (new Uuid())->uuid3();
-        $port = rand(28000, 29999);
+        $port = rand(22000, 49999);
         return [
             'user_id' => 1,
             'up' => 0,
@@ -195,7 +195,7 @@ class InboundController extends Controller
     private function _getIosConfig($remark)
     {
         $uuid = (new Uuid())->uuid3();
-        $port = rand(28000, 29999);
+        $port = rand(22000, 49999);
         return [
             'user_id' => 1,
             'up' => 0,
