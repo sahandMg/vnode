@@ -40,7 +40,7 @@ class ServerStatusCommand extends Command
     public function handle()
     {
         if (Carbon::now()->greaterThan(Carbon::today()->addHours(6))) {
-            $samples = 10;
+            $samples = 20;
             $flag = 0;
             $data = trim(shell_exec("ifstat -q 1 $samples"));
             $data_arr = explode("\n", $data);
@@ -54,7 +54,7 @@ class ServerStatusCommand extends Command
                 }
             }
             if ($flag == $samples) {
-                $msg = env('SERVER_ID') . "☢️ اختلال روی سرور ";
+                $msg =  "☢️ اختلال روی سرور ". env('SERVER_ID');
                 shell_exec('x-ui restart');
                 $url = config('bot.interruption_url');
                 Http::sendHttp($url, ['msg' => $msg]);
