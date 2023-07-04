@@ -40,7 +40,7 @@ class ServerStatusCommand extends Command
     public function handle()
     {
         if (Carbon::now()->greaterThan(Carbon::today()->addHours(6))) {
-            $samples = 20;
+            $samples = 10;
             $flag = 0;
             $data = trim(shell_exec("ifstat -q 1 $samples"));
             $data_arr = explode("\n", $data);
@@ -49,7 +49,7 @@ class ServerStatusCommand extends Command
             $data_arr = array_values($data_arr);
             foreach ($data_arr as $d) {
                 $net_in = array_values(array_filter(explode(" ", trim($d))))[0];
-                if ($net_in < 300) {
+                if ($net_in < 100) {
                     $flag += 1;
                 }
             }
