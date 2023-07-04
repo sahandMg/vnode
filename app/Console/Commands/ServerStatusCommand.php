@@ -12,7 +12,7 @@ class ServerStatusCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'server status';
+    protected $signature = 'server:status';
 
     /**
      * The console command description.
