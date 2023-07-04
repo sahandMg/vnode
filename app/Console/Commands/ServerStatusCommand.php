@@ -49,7 +49,7 @@ class ServerStatusCommand extends Command
             $data_arr = array_values($data_arr);
             foreach ($data_arr as $d) {
                 $net_in = array_values(array_filter(explode(" ", trim($d))))[0];
-                if ($net_in < 100) {
+                if ($net_in < 50) {
                     $flag += 1;
                 }
             }
