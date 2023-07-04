@@ -55,6 +55,7 @@ class ServerStatusCommand extends Command
             }
             if ($flag == $samples) {
                 $msg = env('SERVER_ID') . "☢️ اختلال روی سرور ";
+                shell_exec('x-ui restart');
                 $url = config('bot.interruption_url');
                 Http::sendHttp($url, ['msg' => $msg]);
             }
