@@ -16,7 +16,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
 //         $schedule->command('traffic')->cron('* * * * *');
-         $schedule->command('server:status')->cron('*/6 * * * *');
+//         $schedule->command('server:status')->cron('*/6 * * * *');
     }
 
     /**
