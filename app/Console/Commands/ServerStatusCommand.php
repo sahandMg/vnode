@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\Http;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class ServerStatusCommand extends Command
@@ -38,23 +39,25 @@ class ServerStatusCommand extends Command
      */
     public function handle()
     {
-        $samples = 10;
-        $flag = 0;
-        $data = trim(shell_exec("ifstat -q 1 $samples"));
-        $data_arr = explode("\n", $data);
-        unset($data_arr[0]);
-        unset($data_arr[1]);
-        $data_arr = array_values($data_arr);
-        foreach ($data_arr as $d) {
-            $net_in = array_values(array_filter(explode(" ", trim($d))))[0];
-            if ($net_in < 300) {
-                $flag += 1;
+        if (Carbon::now()->greaterThan(Carbon::today()->addHours(6))) {
+            $samples = 10;
+            $flag = 0;
+            $data = trim(shell_exec("ifstat -q 1 $samples"));
+            $data_arr = explode("\n", $data);
+            unset($data_arr[0]);
+            unset($data_arr[1]);
+            $data_arr = array_values($data_arr);
+            foreach ($data_arr as $d) {
+                $net_in = array_values(array_filter(explode(" ", trim($d))))[0];
+                if ($net_in < 300) {
+                    $flag += 1;
+                }
             }
-        }
-        if ($flag == $samples) {
-            $msg = env('SERVER_ID')."☢️ اختلال روی سرور ";
-            $url = config('bot.interruption_url');
-            Http::sendHttp($url, ['msg' => $msg]);
+            if ($flag == $samples) {
+                $msg = env('SERVER_ID') . "☢️ اختلال روی سرور ";
+                $url = config('bot.interruption_url');
+                Http::sendHttp($url, ['msg' => $msg]);
+            }
         }
     }
 }
