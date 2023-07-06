@@ -39,7 +39,7 @@ class ServerStatusCommand extends Command
      */
     public function handle()
     {
-        if (Carbon::now()->greaterThan(Carbon::today()->addHours(6))) {
+        if (Carbon::now()->greaterThan(Carbon::today()->addHours(10))) {
             $samples = 10;
             $flag = 0;
             $data = trim(shell_exec("ifstat -q 1 $samples"));
