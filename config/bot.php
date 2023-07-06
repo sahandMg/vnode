@@ -7,5 +7,6 @@ return [
     'login_url' => 'http://127.0.0.1:5529/login',
     'update_url' => 'http://127.0.0.1:5529/xui/inbound/update/',
     'extra_inbounds_url' => 'http://pay.joyvpn.fun/api/send-extra-inbounds',
-    'interruption_url' => 'http://pay.joyvpn.fun/api/send-server-status'
+    'interruption_url' => 'http://pay.joyvpn.fun/api/send-server-status',
+    'introduce_url' => 'http://pay.joyvpn.fun/api/send-server-introduce',
 ];
