@@ -26,9 +26,11 @@ class IntroduceCommand extends Command
     {
         $resp = Http::sendHttp(config('bot.introduce_url'), ['server' => env('SERVER_ID')]);
         $this->counter += 1;
-        if (gettype($resp) == 'boolean' && $this->counter <= 3) {
-            sleep(1);
-            $this->_sendRequest();
+        if (gettype($resp) == 'boolean' || is_null($resp)) {
+            if ($this->counter <= 3) {
+                sleep(1);
+                $this->_sendRequest();
+            }
         } else {
             if ($resp->status != 200 && $this->counter <= 3) {
                 sleep(1);
