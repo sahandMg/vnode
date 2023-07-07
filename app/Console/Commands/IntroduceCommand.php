@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\Http;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class IntroduceCommand extends Command
 {
@@ -30,6 +31,8 @@ class IntroduceCommand extends Command
             if ($this->counter <= 3) {
                 sleep(1);
                 $this->_sendRequest();
+            } else {
+                Log::info('Introducing to the master node failed after 3 times');
             }
         } else {
             if ($resp->status != 200 && $this->counter <= 3) {
