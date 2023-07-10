@@ -82,6 +82,25 @@ class InboundController extends Controller
         return response()->json($data, Response::HTTP_OK);
     }
 
+    public function addDays()
+    {
+        $inbound = InboundsDB::getUserByRemark(\request()->get('remark'));
+        if (is_null($inbound)) {
+            $data = [
+                'status' => Response::HTTP_NOT_FOUND,
+                'data' => 'حساب یافت نشد'
+            ];
+            return response()->json($data, Response::HTTP_NOT_FOUND);
+        }
+        $extra_days = \request()->get('days');
+        $inbound = InboundsDB::addDays($inbound->remark, $extra_days);
+        $data = [
+            'status' => Response::HTTP_OK,
+            'data' => $inbound
+        ];
+        return response()->json($data, Response::HTTP_OK);
+    }
+
     public function createAccount()
     {
         $pass = request()->get('pass');

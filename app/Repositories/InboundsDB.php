@@ -264,6 +264,22 @@ class InboundsDB
         return $inbound;
     }
 
+    public static function addDays($remark, $days_num)
+    {
+        $remark = strtolower($remark);
+        $inbound = DB::table('inbounds')
+            ->where('remark', $remark)
+            ->first();
+        $exp_date = Carbon::parse($inbound->expiry_time)->addDays($days_num)->getPreciseTimestamp(3);
+        DB::table('inbounds')
+            ->where('remark', $remark)
+            ->update([
+                'expiry_time' => $exp_date,
+            ]);
+        $inbound->expiry_time = Jalalian::fromCarbon(Carbon::parse($inbound->expiry_time))->addDays($days_num)->format('Y-m-d H:i');
+        return $inbound;
+    }
+
     public static function reconnect($remark)
     {
         $remark = strtolower($remark);
