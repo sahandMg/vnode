@@ -270,7 +270,8 @@ class InboundsDB
         $inbound = DB::table('inbounds')
             ->where('remark', $remark)
             ->first();
-        $exp_date = Carbon::parse($inbound->expiry_time)->addDays($days_num)->getPreciseTimestamp(3);
+        $ts_in_sec = (int)round($inbound->expiry_time/1000);
+        $exp_date = Carbon::parse($ts_in_sec)->addDays($days_num)->getPreciseTimestamp(3);
         DB::table('inbounds')
             ->where('remark', $remark)
             ->update([
