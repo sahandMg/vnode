@@ -277,7 +277,6 @@ class InboundsDB
             ->update([
                 'expiry_time' => $exp_date,
             ]);
-        $inbound->expiry_time = Jalalian::fromCarbon(Carbon::parse($inbound->expiry_time))->addDays($days_num)->format('Y-m-d H:i');
         return $inbound;
     }
 
