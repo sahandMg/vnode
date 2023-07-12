@@ -277,6 +277,7 @@ class InboundsDB
             ->update([
                 'expiry_time' => $exp_date,
             ]);
+        $inbound->expiry_time = $exp_date;
         return $inbound;
     }
 
