@@ -48,7 +48,7 @@ class TrafficMonitor extends Command
 //        Add theses lines to cronttab -e
         //* * * * * php /var/www/html/vnode/artisan traffic
         //* * * * * sleep 30; php /var/www/html/vnode/artisan traffic
-        $txt = shell_exec("sudo iftop -P -n -N -t -s 25 -L 150");
+        $txt = shell_exec("sudo iftop -P -n -N -t -s 40 -L 250 -o 40s");
         $t = array_filter(explode(PHP_EOL, $txt));
         $cumulative = array_splice($t, 7, 200);
         $sum = 0;
