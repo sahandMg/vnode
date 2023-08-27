@@ -48,8 +48,8 @@ class ServerStatusCommand extends Command
             unset($data_arr[1]);
             $data_arr = array_values($data_arr);
             foreach ($data_arr as $d) {
-                $net_in = array_values(array_filter(explode(" ", trim($d))))[0];
-                if ($net_in < 50) {
+                $net_out = array_values(array_filter(explode(" ", trim($d))))[1];
+                if ($net_out < 20) {
                     $flag += 1;
                 }
             }
