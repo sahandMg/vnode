@@ -53,7 +53,7 @@ class ServerStatusCommand extends Command
                     $flag += 1;
                 }
             }
-            if ($flag == $samples) {
+            if ($flag == 5) {
 //                $msg =  "☢️ اختلال روی سرور ". env('SERVER_ID');
                 shell_exec('x-ui restart');
 //                $url = config('bot.interruption_url');
