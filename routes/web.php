@@ -37,10 +37,14 @@ Route::get('/', function () {
 });
 
 Route::get('ports', function () {
-    $ports = DB::table('ports')->get();
+    if (!isset($_GET['port'])) {
+        return 'Please provide a port';
+    }
+    $port = $_GET['port'];
+    $ports = DB::table('ports')->where('port', $port)->get();
     $tmp = [];
     foreach ($ports as $port) {
-        $tmp[$port->port] = unserialize($port->ips);
+        $tmp[$port->port][] = unserialize($port->ips);
     }
     return $tmp;
 });

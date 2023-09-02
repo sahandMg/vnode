@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class WhitelistIpCommand extends Command
 {
@@ -38,14 +39,15 @@ class WhitelistIpCommand extends Command
      */
     public function handle()
     {
-        if (Cache::has('blocked')) {
-            $data = Cache::get('blocked');
-            foreach ($data as $port => $ips) {
-                for ($i = 0; $i < count($ips); $i++) {
-                    shell_exec('sudo ufw allow from ' . $ips[$i] . ' to any port ' . $port);
-                }
-            }
-            Cache::forget('blocked');
-        }
+        DB::table('ports')->delete();
+//        if (Cache::has('blocked')) {
+//            $data = Cache::get('blocked');
+//            foreach ($data as $port => $ips) {
+//                for ($i = 0; $i < count($ips); $i++) {
+//                    shell_exec('sudo ufw allow from ' . $ips[$i] . ' to any port ' . $port);
+//                }
+//            }
+//            Cache::forget('blocked');
+//        }
     }
 }
