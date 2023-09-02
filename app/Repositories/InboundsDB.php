@@ -210,10 +210,10 @@ class InboundsDB
         $inbound->total = $inbound->total + $vol;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
         $user = UserDB::getUserData();
-        $login_url = config('bot.login_url').'?username='.$user->username.'&password='.$user->password;
+        $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
         $cookie = Http::sendHttpLogin($login_url);
         $update_url = config('bot.update_url') . $inbound->id;
-        Http::sendHttp($update_url, $inbound_arr, ['Cookie:'. $cookie]);
+        Http::sendHttp($update_url, $inbound_arr, ['Cookie:' . $cookie]);
         return $inbound;
     }
 
@@ -229,9 +229,9 @@ class InboundsDB
         if ($inbound->total == $base) {
             $total = 64424509440;
         } elseif ($inbound->total > $base && $used >= $base) {
-            $remain = $inbound->total - $used ;
+            $remain = $inbound->total - $used;
             $total = $remain + $base;
-        } elseif($inbound->total > $base && $used < $base) {
+        } elseif ($inbound->total > $base && $used < $base) {
             $total = $inbound->total;
         } else {
             $total = $inbound->total;
@@ -257,10 +257,10 @@ class InboundsDB
         $inbound->expiry_time = $exp_date;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
         $user = UserDB::getUserData();
-        $login_url = config('bot.login_url').'?username='.$user->username.'&password='.$user->password;
+        $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
         $cookie = Http::sendHttpLogin($login_url);
         $update_url = config('bot.update_url') . $inbound->id;
-        Http::sendHttp($update_url, $inbound_arr, ['Cookie:'. $cookie]);
+        Http::sendHttp($update_url, $inbound_arr, ['Cookie:' . $cookie]);
         return $inbound;
     }
 
@@ -270,7 +270,7 @@ class InboundsDB
         $inbound = DB::table('inbounds')
             ->where('remark', $remark)
             ->first();
-        $ts_in_sec = (int)round($inbound->expiry_time/1000);
+        $ts_in_sec = (int)round($inbound->expiry_time / 1000);
         $exp_date = Carbon::parse($ts_in_sec)->addDays($days_num)->getPreciseTimestamp(3);
         DB::table('inbounds')
             ->where('remark', $remark)
@@ -295,10 +295,10 @@ class InboundsDB
         $inbound->enable = 1;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
         $user = UserDB::getUserData();
-        $login_url = config('bot.login_url').'?username='.$user->username.'&password='.$user->password;
+        $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
         $cookie = Http::sendHttpLogin($login_url);
         $update_url = config('bot.update_url') . $inbound->id;
-        Http::sendHttp($update_url, $inbound_arr, ['Cookie:'. $cookie]);
+        Http::sendHttp($update_url, $inbound_arr, ['Cookie:' . $cookie]);
         return $inbound;
     }
 
@@ -316,10 +316,10 @@ class InboundsDB
         $inbound->enable = 0;
         $inbound_arr = Utils::prepareInboundForUpdate($inbound);
         $user = UserDB::getUserData();
-        $login_url = config('bot.login_url').'?username='.$user->username.'&password='.$user->password;
+        $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
         $cookie = Http::sendHttpLogin($login_url);
         $update_url = config('bot.update_url') . $inbound->id;
-        Http::sendHttp($update_url, $inbound_arr, ['Cookie:'. $cookie]);
+        Http::sendHttp($update_url, $inbound_arr, ['Cookie:' . $cookie]);
         return $inbound;
     }
 
@@ -334,13 +334,19 @@ class InboundsDB
     public static function storePorts($ports)
     {
         foreach ($ports as $port => $ips) {
-            $record = DB::table('ports')->where('port', $port)->first();
-            if (is_null($record)) {
-                DB::table('ports')->insert(['port' => $port, 'ips' => serialize($ips)]);
+            $records = DB::table('ports')->where('port', $port)->whereDate('created_at', '=', Carbon::today())->get();
+            if (count($records) == 0) {
+                DB::table('ports')->insert([
+                    'port' => $port,
+                    'ips' => serialize($ips),
+                    'created_at' => Carbon::now()
+                ]);
             } else {
-                $ips_arr = unserialize($record->ips);
-                $new_ips = array_values(array_unique(array_merge($ips_arr, $ips)));
-                DB::table('ports')->where('port', $port)->update(['ips' => serialize($new_ips)]);
+                foreach ($records as $record) {
+                    $ips_arr = unserialize($record->ips);
+                    $new_ips = array_values(array_unique(array_merge($ips_arr, $ips)));
+                    DB::table('ports')->where('port', $port)->update(['ips' => serialize($new_ips), 'updated_at' => Carbon::now()]);
+                }
             }
         }
     }
