@@ -36,20 +36,20 @@ class TrafficMonitor extends Command
      */
     public function handle()
     {
-        include(app_path('Services/phpseclib/Net/SSH2.php'));
-        $ssh = new Net_SSH2('185.36.231.170');
-        if (!$ssh->login('root', 'Ss44644831')) {
-            exit('Login Failed');
-        }
-        $txt = $ssh->exec("iftop -P -n -N -i ens160 -t -s 5 -L 150");
-        $ssh->disconnect();
-        Cache::forever('traffic', $txt);
-        $txt = Cache::get('traffic');
+//        include(app_path('Services/phpseclib/Net/SSH2.php'));
+//        $ssh = new Net_SSH2('185.36.231.170');
+//        if (!$ssh->login('root', 'Ss44644831')) {
+//            exit('Login Failed');
+//        }
+//        $txt = $ssh->exec("iftop -P -n -N -i ens160 -t -s 5 -L 150");
+//        $ssh->disconnect();
+//        Cache::forever('traffic', $txt);
+//        $txt = Cache::get('traffic');
 
 //        Add these lines to cronttab -e
         //* * * * * php /var/www/html/vnode/artisan traffic
         //* * * * * sleep 30; php /var/www/html/vnode/artisan traffic
-//        $txt = shell_exec("sudo iftop -P -n -N -t -s 40 -L 250 -o 40s");
+        $txt = shell_exec("sudo iftop -P -n -N -t -s 40 -L 250 -o 40s");
         $t = array_filter(explode(PHP_EOL, $txt));
         $cumulative = array_splice($t, 7, 200);
         $sum = 0;
