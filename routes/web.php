@@ -41,10 +41,14 @@ Route::get('ports', function () {
         return 'Please provide a port';
     }
     $port = $_GET['port'];
-    $ports = DB::table('ports')->where('port', $port)->get();
+    $ports = DB::table('ports')
+        ->select('port', 'ips', 'created_at')
+        ->where('port', $port)
+        ->groupBy('created_at')
+        ->get();
     $tmp = [];
     foreach ($ports as $port) {
-        $tmp[$port->port][] = unserialize($port->ips);
+        $tmp[$port->port][$port->created_at] = unserialize($port->ips);
     }
     return $tmp;
 });
@@ -66,7 +70,7 @@ Route::get('stats', function () {
     return view('stats', compact('ports'));
 });
 
-Route::get('remarks', function() {
+Route::get('remarks', function () {
     return Cache::get('remarks');
 });
 
@@ -88,17 +92,17 @@ Route::get('transpiler', function () {
         "path" => "/",
         "tls" => "none"
     ];
-    $e = 'vmess://'.base64_encode(json_encode($t3));
+    $e = 'vmess://' . base64_encode(json_encode($t3));
     return $e;
     dd(base64_decode($t), base64_decode($t2));
 });
 
-Route::get('vol', function() {
+Route::get('vol', function () {
     $inbounds = InboundsDB::getAllInbounds();
     $s = 0;
     foreach ($inbounds as $inbound) {
 
-        if ($inbound->total !== 0 && $inbound->down > 10^9) {
+        if ($inbound->total !== 0 && $inbound->down > 10 ^ 9) {
             if ($inbound->up + $inbound->down < $inbound->total / 2) {
                 $s += 1;
             }
