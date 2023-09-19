@@ -111,11 +111,13 @@ class InboundController extends Controller
         $last_config = DB::table('inbounds')->orderBy('id', 'desc')->first();
         preg_match_all('!\d+!', $last_config->remark ?? env('SERVER_ID') . '.0', $matches);
         $last_user_id = end($matches[0]);
-        $type = isset($_GET['type']) ? $_GET['type']: 'and';
+        $type = isset($_GET['type']) ? $_GET['type'] : 'and';
         for ($c = 1; $c <= $num; $c++) {
             $remark = env('SERVER_ID') . '.' . $last_user_id + $c;
             if ($type == 'and') {
                 DB::table('inbounds')->insert($this->_getAndroidConfig($remark));
+            } elseif ($type == 'grpc') {
+                DB::table('inbounds')->insert($this->_getGrpcConfig($remark));
             } else {
                 DB::table('inbounds')->insert($this->_getIosConfig($remark));
             }
@@ -251,5 +253,80 @@ class InboundController extends Controller
     "tls"
   ]
 }'];
+    }
+
+    private function _getGrpcConfig($remark)
+    {
+        $uuid = (new Uuid())->uuid3();
+        $port = rand(22000, 49999);
+        $txt = str_replace("\n", ' ', shell_exec('/usr/local/x-ui/bin/xray-linux-amd64 x25519'));
+        $key_arr = array_filter(explode(' ', $txt));
+        $prive = "$key_arr[2]";
+        $pub = "$key_arr[5]";
+        return [
+            'user_id' => 1,
+            'up' => 0,
+            'down' => 0,
+            'total' => 0,
+            'remark' => $remark,
+            'enable' => 1,
+            'expiry_time' => 0,
+            'listen' => '',
+            'port' => $port,
+            'protocol' => 'vless',
+            'settings' => '{
+  "clients": [
+      {
+      "id": ' . json_encode($uuid) . ',
+      "email": "",
+      "flow": "",
+      "fingerprint": "chrome",
+      "total": 0,
+      "expiryTime": 0
+    }
+  ],
+   "decryption": "none",
+   "fallbacks": []
+}',
+            'stream_settings' => '{
+  "network": "grpc",
+  "security": "reality",
+  "realitySettings": {
+    "show": false,
+    "dest": "www.speedtest.org:443",
+    "xver": 0,
+    "serverNames": [
+      "www.speedtest.org"
+    ],
+    "privateKey": '.json_encode($prive).',
+    "publicKey": '.json_encode($pub).',
+    "minClient": "",
+    "maxClient": "",
+    "maxTimediff": 0,
+    "shortIds": [
+      "",
+      "82",
+      "45e7",
+      "2fcd03",
+      "fe0d354d"
+    ]
+  },
+  "grpcSettings": {
+    "serviceName": ""
+  }
+}',
+            'tag' => 'inbound-' . $port,
+            'sniffing' => '{
+  "enabled": true,
+  "destOverride": [
+    "http",
+    "tls",
+    "quic"
+  ]
+}',
+            'autoreset' => 0,
+            'ip_alert' => 0,
+            'ip_limit' => 0,
+        ];
     }
 }
