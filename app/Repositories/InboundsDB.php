@@ -345,7 +345,11 @@ class InboundsDB
                 foreach ($records as $record) {
                     $ips_arr = unserialize($record->ips);
                     $new_ips = array_values(array_unique(array_merge($ips_arr, $ips)));
-                    DB::table('ports')->where('port', $port)->update(['ips' => serialize($new_ips), 'updated_at' => Carbon::now()]);
+                    DB::table('ports')
+                        ->where('port', $port)
+                        ->whereDate('created_at', '=', Carbon::today())
+                        ->update(['ips' => serialize($new_ips), 'updated_at' => Carbon::now()
+                        ]);
                 }
             }
         }
