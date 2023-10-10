@@ -25,4 +25,9 @@ class Utils
             'sniffing'          => $inbound->sniffing
         ];
     }
+
+    public static function portGenerator()
+    {
+        return rand(12000, 49999);
+    }
 }

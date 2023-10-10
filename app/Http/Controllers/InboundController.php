@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\InboundsDB;
+use App\Services\Utils;
 use Faker\Core\Uuid;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class InboundController extends Controller
 {
+    protected $all_ports;
+
     public function getInbound()
     {
         $record = InboundsDB::getUserByRemark(\request()->get('remark'));
@@ -108,6 +111,7 @@ class InboundController extends Controller
         if ($pass != env('PASS')) {
             return 404;
         }
+        $this->all_ports = InboundsDB::getAllPorts();
         $last_config = DB::table('inbounds')->orderBy('id', 'desc')->first();
         preg_match_all('!\d+!', $last_config->remark ?? env('SERVER_ID') . '.0', $matches);
         $last_user_id = end($matches[0]);
@@ -151,7 +155,11 @@ class InboundController extends Controller
     private function _getAndroidConfig($remark)
     {
         $uuid = (new Uuid())->uuid3();
-        $port = rand(22000, 49999);
+        $port = Utils::portGenerator();
+        while (in_array($port, $this->all_ports)) {
+            $port = Utils::portGenerator();
+        }
+        $this->all_ports[] = $port;
         return [
             'user_id' => 1,
             'up' => 0,
@@ -216,7 +224,11 @@ class InboundController extends Controller
     private function _getIosConfig($remark)
     {
         $uuid = (new Uuid())->uuid3();
-        $port = rand(22000, 49999);
+        $port = Utils::portGenerator();
+        while (in_array($port, $this->all_ports)) {
+            $port = Utils::portGenerator();
+        }
+        $this->all_ports[] = $port;
         return [
             'user_id' => 1,
             'up' => 0,
@@ -258,7 +270,11 @@ class InboundController extends Controller
     private function _getGrpcConfig($remark)
     {
         $uuid = (new Uuid())->uuid3();
-        $port = rand(22000, 49999);
+        $port = Utils::portGenerator();
+        while (in_array($port, $this->all_ports)) {
+            $port = Utils::portGenerator();
+        }
+        $this->all_ports[] = $port;
         $txt = str_replace("\n", ' ', shell_exec('/usr/local/x-ui/bin/xray-linux-amd64 x25519'));
         $key_arr = array_filter(explode(' ', $txt));
         $prive = "$key_arr[2]";
