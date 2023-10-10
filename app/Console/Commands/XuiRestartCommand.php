@@ -38,12 +38,9 @@ class XuiRestartCommand extends Command
      */
     public function handle()
     {
-        if (!request()->has('pass')) {
-            exit();
-        }
         include(app_path('Services/phpseclib/Net/SSH2.php'));
         $ssh = new Net_SSH2(env("IP_ADDRESS"));
-        if (!$ssh->login('root', request()->get('pass'))) {
+        if (!$ssh->login('root', env('PASS2'))) {
             exit('Login Failed' . env('IP_ADDRESS'));
         }
         $ssh->exec("lsof -t -i:1025 /etc/x-ui/x-ui.db | xargs kill -9");
