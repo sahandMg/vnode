@@ -38,6 +38,12 @@ class InboundsDB
         return DB::table('inbounds')->pluck('port')->toArray();
     }
 
+    public static function getAllCommonPorts()
+    {
+        $common_remark = config('bot.common_remark');
+        return DB::table('inbounds')->where('remark', 'like', "%$common_remark%")->pluck('port')->toArray();
+    }
+
     public static function getAllInbounds()
     {
         return DB::table('inbounds')->get();

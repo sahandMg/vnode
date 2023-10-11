@@ -57,6 +57,7 @@ class TrafficMonitor extends Command
         $port_div = [];
         $remarks = [];
         $all_ports = InboundsDB::getAllPorts();
+        $all_common_ports = InboundsDB::getAllCommonPorts();
         for ($i = 0; $i < count($cumulative); $i += 2) {
             try {
                 $tmp = array_values(array_filter(explode(' ', $cumulative[$i])));
@@ -67,7 +68,7 @@ class TrafficMonitor extends Command
                 $port = explode(':', $tmp[1])[1];
                 $source = array_values(array_filter(explode(' ', $cumulative[$i + 1])));
                 $source_ip = explode(':', $source[0])[0];
-                if (!in_array($port, $all_ports)) {
+                if (!in_array($port, $all_ports) || in_array($port, $all_common_ports)) {
                     continue;
                 }
                 if (!isset($ports[$port])) {

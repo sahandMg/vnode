@@ -9,4 +9,5 @@ return [
     'extra_inbounds_url' => 'https://pay.joyvpn.fun/api/send-extra-inbounds',
     'interruption_url' => 'https://pay.joyvpn.fun/api/send-server-status',
     'introduce_url' => 'https://pay.joyvpn.fun/api/send-server-introduce',
+    'common_remark' => 'br1000',
 ];
