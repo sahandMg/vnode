@@ -42,17 +42,17 @@ class DbMergerCommand extends Command
                     'tag' => $record->tag,
                     'sniffing' => $record->sniffing,
                 ]);
-                include(app_path('Services/phpseclib/Net/SSH2.php'));
-                $ssh = new Net_SSH2(env("IP_ADDRESS"));
-                if (!$ssh->login('root', env('PASS2'))) {
-                    exit('Login Failed' . env('IP_ADDRESS'));
-                }
-                $ssh->exec("lsof -t -i:1025 /etc/x-ui/x-ui.db | xargs kill -9");
-                $ssh->exec("x-ui start");
             }catch (\Exception $exception) {
                 info($record->remark.' Enable:'. $record->enable);
                 info($exception->getMessage());
             }
         }
+        include(app_path('Services/phpseclib/Net/SSH2.php'));
+        $ssh = new Net_SSH2(env("IP_ADDRESS"));
+        if (!$ssh->login('root', env('PASS2'))) {
+            exit('Login Failed' . env('IP_ADDRESS'));
+        }
+        $ssh->exec("lsof -t -i:1025 /etc/x-ui/x-ui.db | xargs kill -9");
+        $ssh->exec("x-ui start");
     }
 }
