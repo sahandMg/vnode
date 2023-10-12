@@ -54,5 +54,6 @@ class DbMergerCommand extends Command
         }
 //        $ssh->exec("lsof -t -i:1025 /etc/x-ui/x-ui.db | xargs kill -9");
         $ssh->exec("x-ui restart");
+        $ssh->disconnect();
     }
 }
