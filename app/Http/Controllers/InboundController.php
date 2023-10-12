@@ -112,15 +112,17 @@ class InboundController extends Controller
             return 404;
         }
         $this->all_ports = InboundsDB::getAllPorts();
-        $last_config = DB::table('inbounds')->orderBy('id', 'desc')->first();
+        $last_config = InboundsDB::getLatestInbound(env('SERVER_ID'));
         preg_match_all('!\d+!', $last_config->remark ?? env('SERVER_ID') . '.0', $matches);
         $last_user_id = end($matches[0]);
+        if (isset($_GET['bulk'])) {
+            $last_config = InboundsDB::getLatestInbound(config('bot.common_remark'));
+            preg_match_all('!\d+!', $last_config->remark  ?? config('bot.common_remark') . '.0' ,$bulk_matches);
+            $last_user_id = end($bulk_matches[0]);
+        }
         $type = isset($_GET['type']) ? $_GET['type'] : 'and';
         for ($c = 1; $c <= $num; $c++) {
-            $remark = env('SERVER_ID') . '.' . $last_user_id + $c;
-            if (isset($_GET['bulk'])) {
-                $remark = config('bot.common_remark').'.'.$last_user_id + $c;
-            }
+            $remark = isset($_GET['bulk']) ? config('bot.common_remark').'.'.$last_user_id + $c : env('SERVER_ID') . '.' . $last_user_id + $c;
             if ($type == 'and') {
                 DB::table('inbounds')->insert($this->_getAndroidConfig($remark));
             } elseif ($type == 'grpc') {

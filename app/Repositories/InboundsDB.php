@@ -54,6 +54,14 @@ class InboundsDB
         return DB::table('inbounds')->where('port', $port)->update(['enable' => 0]);
     }
 
+    public static function getLatestInbound($remarkTempla)
+    {
+       return DB::table('inbounds')
+            ->where('remark', 'like', "%$remarkTempla%")
+            ->orderBy('id', 'desc')
+            ->first();
+    }
+
     public static function blockIp($ip, $port)
     {
         $resp = shell_exec('sudo ufw insert 1 deny from ' . $ip . ' to any port ' . $port);
