@@ -128,7 +128,7 @@ class InboundController extends Controller
             } else {
                 DB::table('inbounds')->insert($this->_getIosConfig($remark));
             }
-//            $inbound = InboundsDB::reconnect($remark);
+            $inbound = InboundsDB::reconnect($remark);
         }
         return 200;
     }
