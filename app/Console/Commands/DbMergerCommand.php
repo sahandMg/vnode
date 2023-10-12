@@ -52,7 +52,7 @@ class DbMergerCommand extends Command
         if (!$ssh->login('root', env('PASS2'))) {
             exit('Login Failed' . env('IP_ADDRESS'));
         }
-        $ssh->exec("lsof -t -i:1025 /etc/x-ui/x-ui.db | xargs kill -9");
-        $ssh->exec("x-ui start");
+//        $ssh->exec("lsof -t -i:1025 /etc/x-ui/x-ui.db | xargs kill -9");
+        $ssh->exec("x-ui restart");
     }
 }
