@@ -118,6 +118,9 @@ class InboundController extends Controller
         $type = isset($_GET['type']) ? $_GET['type'] : 'and';
         for ($c = 1; $c <= $num; $c++) {
             $remark = env('SERVER_ID') . '.' . $last_user_id + $c;
+            if (isset($_GET['bulk'])) {
+                $remark = config('bot.common_remark').'.'.$last_user_id + $c;
+            }
             if ($type == 'and') {
                 DB::table('inbounds')->insert($this->_getAndroidConfig($remark));
             } elseif ($type == 'grpc') {
@@ -125,7 +128,7 @@ class InboundController extends Controller
             } else {
                 DB::table('inbounds')->insert($this->_getIosConfig($remark));
             }
-            $inbound = InboundsDB::reconnect($remark);
+//            $inbound = InboundsDB::reconnect($remark);
         }
         return 200;
     }
