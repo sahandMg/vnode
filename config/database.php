@@ -38,7 +38,7 @@ return [
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DATABASE_URL'),
-            'database' =>  env('APP_ENV') == 'local' ? database_path('x-ui.db') : '/etc/x-ui/x-ui.db',
+            'database' =>  env('APP_ENV') == 'local' ? database_path('origin.db') : '/etc/x-ui/x-ui.db',
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],

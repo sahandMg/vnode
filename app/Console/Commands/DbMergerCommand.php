@@ -20,6 +20,14 @@ class DbMergerCommand extends Command
 
     public function handle()
     {
+        $forbidden_ports = DB::connection('sqlite')
+            ->table('inbounds')
+            ->where('port', '<' , 14000)
+            ->where('port', '>' , 13000)
+            ->count();
+        if ($forbidden_ports != 0) {
+            exit('Forbidden Ports Found');
+        }
         $child = DB::connection('sqlite2')->table('inbounds')->get();
         foreach ($child as $record) {
             try{
