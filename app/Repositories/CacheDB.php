@@ -31,7 +31,7 @@ class CacheDB
 
     public static function storeActiveSessions($num)
     {
-        Cache::forever('active_sessions', $num);
+        Cache::put('active_sessions', $num, 600);
     }
 
     public static function getActiveSessions()
