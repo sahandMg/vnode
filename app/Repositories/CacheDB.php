@@ -28,4 +28,14 @@ class CacheDB
     {
         return Cache::get('remarks') ?? [];
     }
+
+    public static function storeActiveSessions($num)
+    {
+        Cache::forever('active_sessions', $num);
+    }
+
+    public static function getActiveSessions()
+    {
+        return Cache::get('active_sessions');
+    }
 }

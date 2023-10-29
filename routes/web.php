@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\InboundController;
 use App\Models\Usage;
+use App\Repositories\CacheDB;
 use App\Repositories\InboundsDB;
 use App\Repositories\UserDB;
 use App\Services\Http;
@@ -113,4 +114,8 @@ Route::get('vol', function () {
 
 Route::get('j', function () {
     return Jalalian::now();
+});
+
+Route::get('sessions', function () {
+    return CacheDB::getActiveSessions();
 });

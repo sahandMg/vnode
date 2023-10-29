@@ -112,7 +112,7 @@ class GenerateInboundCommand extends Command
     }
   }
 }',
-            'tag' => 'inbound-' . $port,
+            'tag' => 'inbound-14255',
             'sniffing' => '{
   "enabled": true,
   "destOverride": [
