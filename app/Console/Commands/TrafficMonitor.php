@@ -140,7 +140,7 @@ class TrafficMonitor extends Command
         }
 //        Cache::forever('port_div', $port_div);
         InboundsDB::storePorts($port_div);
-        CacheDB::storeActiveSessions(count($port_div));
+        CacheDB::storeActiveSessions($port_div);
         Log::info('============ TOTAL USAGE: ' . $sum);
         Log::info('============ TOTAL USAGE: ' . json_encode($port_div));
     }

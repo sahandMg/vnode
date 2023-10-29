@@ -29,9 +29,13 @@ class CacheDB
         return Cache::get('remarks') ?? [];
     }
 
-    public static function storeActiveSessions($num)
+    public static function storeActiveSessions(array $sessions)
     {
-        Cache::put('active_sessions', $num, 600);
+        $tmp = 0;
+        foreach ($sessions as $port => $ips) {
+            $tmp += count($ips);
+        }
+        Cache::put('active_sessions', $tmp, 600);
     }
 
     public static function getActiveSessions()
