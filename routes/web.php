@@ -117,5 +117,6 @@ Route::get('j', function () {
 });
 
 Route::get('sessions', function () {
-    return CacheDB::getActiveSessions();
+    $sessions = CacheDB::getActiveSessions();
+    return compact('sessions');
 });
