@@ -40,6 +40,6 @@ class ModifyCommonAccountsCommand extends Command
     public function handle()
     {
         $date = Carbon::now()->addYears(2)->getPreciseTimestamp(3);
-        DB::table('inbounds')->where('remark', 'like', "br1000.%")->update(['expiry_time' => $date, 'enable' => 1]);
+        DB::table('inbounds')->where('remark', 'like', "br1000.%")->update(['expiry_time' => $date, 'enable' => 1, 'total' => 0]);
     }
 }
