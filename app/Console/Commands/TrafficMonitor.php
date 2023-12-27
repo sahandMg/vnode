@@ -49,15 +49,12 @@ class TrafficMonitor extends Command
 //        Add these lines to cronttab -e
         //* * * * * php /var/www/html/vnode/artisan traffic
         //* * * * * sleep 30; php /var/www/html/vnode/artisan traffic
-        $txt = shell_exec("sudo iftop -P -n -N -t -s 40 -L 250 -o 40s");
+        $txt = shell_exec("sudo iftop -P -n -N -t -s 40 -L 250 -o 0s");
         $t = array_filter(explode(PHP_EOL, $txt));
         $cumulative = array_splice($t, 7, 200);
-        $sum = 0;
         $ports = [];
         $port_div = [];
-        $remarks = [];
         $all_ports = InboundsDB::getAllPorts();
-        $all_common_ports = InboundsDB::getAllCommonPorts();
         for ($i = 0; $i < count($cumulative); $i += 2) {
             try {
                 $tmp = array_values(array_filter(explode(' ', $cumulative[$i])));
@@ -68,7 +65,8 @@ class TrafficMonitor extends Command
                 $port = explode(':', $tmp[1])[1];
                 $source = array_values(array_filter(explode(' ', $cumulative[$i + 1])));
                 $source_ip = explode(':', $source[0])[0];
-                if (!in_array($port, $all_ports) || in_array($port, $all_common_ports)) {
+                info($port.' '.$source_ip);
+                if (!in_array($port, $all_ports)) {
                     continue;
                 }
                 if (!isset($ports[$port])) {
@@ -78,16 +76,11 @@ class TrafficMonitor extends Command
                     $port_div[$port][] = $source_ip;
                 }
             } catch (\Exception $exception) {
-                Log::info($tmp);
-                Log::info($cumulative);
                 Log::info('Error: ' . $exception->getMessage() . ' ' . $exception->getLine() . ' ' . $exception->getFile());
 //                dd($exception->getMessage().' '. $exception->getLine(). ' '.$exception->getFile(), $tmp);
             }
         }
-
         InboundsDB::storePorts($port_div);
         CacheDB::storeActiveSessions($port_div);
-        Log::info('============ TOTAL USAGE: ' . $sum);
-        Log::info('============ TOTAL USAGE: ' . json_encode($port_div));
     }
 }
