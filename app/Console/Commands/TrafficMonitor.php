@@ -74,57 +74,8 @@ class TrafficMonitor extends Command
                 if (!isset($ports[$port])) {
                     $ports[$port] = $source_ip;
                     $port_div[$port][] = $source_ip;
-                    InboundsDB::setAccountDate($port);
                 } elseif (!in_array($source_ip, $port_div[$port])) {
                     $port_div[$port][] = $source_ip;
-                }
-                if (count($port_div[$port]) > 2 && $port != env('TRAFFIC_PORT') && !in_array($port, $this->exception_ports)) {
-                    $record = InboundsDB::getActiveUserByPort($port);
-                    if (!is_null($record) && !in_array($record->remark, $remarks)) {
-                        $remarks[] = $record->remark.' ip: '.$source_ip;
-//                        CacheDB::storeExtraRemark($record->remark);
-//                        InboundsDB::disableAccountByPort($port);
-                    }
-                }
-                $usage = $tmp[6];
-                $source_usage = $source[5];
-                if (str_contains($usage, 'MB') || str_contains($usage, 'Mb')) {
-                    $rate = 1000000;
-                } elseif (str_contains($usage, 'KB') || str_contains($usage, 'Kb')) {
-                    $rate = 1000;
-                } else {
-                    $rate = 10;
-                }
-                if (str_contains($source_usage, 'MB') || str_contains($source_usage, 'Mb')) {
-                    $source_rate = 1000000;
-                } elseif (str_contains($source_usage, 'KB') || str_contains($source_usage, 'Kb')) {
-                    $source_rate = 1000;
-                } else {
-                    $source_rate = 10;
-                }
-                preg_match('!\d+!', $usage, $match);
-                preg_match('!\d+!', $source_usage, $source_match);
-                if (count($match) > 0 && count($source_match) > 0 && $port != env('TRAFFIC_PORT')) {
-                    $received = (int)$match[0] * $rate * env('CORRECTION_RATE');
-                    $sent = (int)($match[0] / 10) * $rate * env('CORRECTION_RATE');
-                    $source_received = (int)$source_match[0] * $source_rate * env('CORRECTION_RATE');
-                    $source_sent = (int)($source_match[0] / 10) * $source_rate * env('CORRECTION_RATE');
-                    Log::info("Traffic usage for $ip:$port: sent: $sent & received: $received");
-                    $total_sent = $sent + $source_sent;
-                    $total_received = $received + $source_received;
-                    if (env('STATS') == 1) {
-                        InboundsDB::updateNetworkTrafficByPort($port, $total_sent, $total_received);
-                    }
-                    $s = $sent + $received + $source_received + $source_sent;
-                    $active_ports = InboundsDB::getAllActivePorts();
-                    in_array($port, $active_ports) ? InboundsDB::storeUsageInCache($port, $s) : null;
-                    $sum += ($sent + $received + $source_received + $source_sent);
-                } elseif (count($match) > 0 && $port == env('TRAFFIC_PORT')) {
-                    $received = (int)$match[0] * $rate * env('CORRECTION_RATE');
-                    $sent = (int)($match[0] / 10) * $rate * env('CORRECTION_RATE');
-                    if (env('STATS') == 1) {
-                        InboundsDB::updateAllAvailableAccounts($sent, $received);
-                    }
                 }
             } catch (\Exception $exception) {
                 Log::info($tmp);
@@ -133,12 +84,7 @@ class TrafficMonitor extends Command
 //                dd($exception->getMessage().' '. $exception->getLine(). ' '.$exception->getFile(), $tmp);
             }
         }
-        if (count($remarks) > 0) {
-            $url = config('bot.extra_inbounds_url');
-            $remarks[] = 'Hey Delain!';
-//            Http::sendHttp($url, $remarks);
-        }
-//        Cache::forever('port_div', $port_div);
+
         InboundsDB::storePorts($port_div);
         CacheDB::storeActiveSessions($port_div);
         Log::info('============ TOTAL USAGE: ' . $sum);
