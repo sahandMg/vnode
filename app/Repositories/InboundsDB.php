@@ -17,7 +17,7 @@ class InboundsDB
     public static function getUserByRemark($remark)
     {
         $remark = strtolower($remark);
-        return DB::table('inbounds')->where('remark', $remark)->first();
+        return DB::table('client_infos')->where('email', $remark)->first();
     }
 
     public static function updateNetworkTrafficByPort($port, $sent, $received)
@@ -216,9 +216,9 @@ class InboundsDB
     public static function updateUserVol($remark, $vol)
     {
         $remark = strtolower($remark);
-        $inbound = DB::table('inbounds')->where('remark', $remark)->first();
-        DB::table('inbounds')
-            ->where('remark', $remark)
+        $inbound = DB::table('client_infos')->where('email', $remark)->first();
+        DB::table('client_infos')
+            ->where('email', $remark)
             ->update(['total' => $inbound->total + $vol, 'enable' => 1]);
         $inbound->enable = 1;
         $inbound->total = $inbound->total + $vol;
@@ -234,8 +234,8 @@ class InboundsDB
     public static function updateExpiry($remark)
     {
         $remark = strtolower($remark);
-        $inbound = DB::table('inbounds')
-            ->where('remark', $remark)
+        $inbound = DB::table('client_infos')
+            ->where('email', $remark)
             ->first();
         $total = 0;
         $base = 64424509440;
@@ -255,8 +255,8 @@ class InboundsDB
             Jalalian::now()->addMonths()->addDays(2)->toCarbon()->getPreciseTimestamp(3)
             :
             Jalalian::now()->addMonths(1)->toCarbon()->getPreciseTimestamp(3);
-        DB::table('inbounds')
-            ->where('remark', $remark)
+        DB::table('client_infos')
+            ->where('email', $remark)
             ->update([
                 'expiry_time' => $exp_date,
                 'enable' => 1,
@@ -281,13 +281,13 @@ class InboundsDB
     public static function addDays($remark, $days_num)
     {
         $remark = strtolower($remark);
-        $inbound = DB::table('inbounds')
-            ->where('remark', $remark)
+        $inbound = DB::table('client_infos')
+            ->where('email', $remark)
             ->first();
         $ts_in_sec = (int)round($inbound->expiry_time / 1000);
         $exp_date = Carbon::parse($ts_in_sec)->addDays($days_num)->getPreciseTimestamp(3);
-        DB::table('inbounds')
-            ->where('remark', $remark)
+        DB::table('client_infos')
+            ->where('email', $remark)
             ->update([
                 'expiry_time' => $exp_date,
             ]);
@@ -298,11 +298,11 @@ class InboundsDB
     public static function reconnect($remark)
     {
         $remark = strtolower($remark);
-        $inbound = DB::table('inbounds')
-            ->where('remark', $remark)
+        $inbound = DB::table('client_infos')
+            ->where('email', $remark)
             ->first();
-        DB::table('inbounds')
-            ->where('remark', $remark)
+        DB::table('client_infos')
+            ->where('email', $remark)
             ->update([
                 'enable' => 1,
             ]);
@@ -319,11 +319,11 @@ class InboundsDB
     public static function disconnect($remark)
     {
         $remark = strtolower($remark);
-        $inbound = DB::table('inbounds')
-            ->where('remark', $remark)
+        $inbound = DB::table('client_infos')
+            ->where('email', $remark)
             ->first();
-        DB::table('inbounds')
-            ->where('remark', $remark)
+        DB::table('client_infos')
+            ->where('email', $remark)
             ->update([
                 'enable' => 0,
             ]);
