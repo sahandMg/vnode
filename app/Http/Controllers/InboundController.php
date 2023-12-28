@@ -58,8 +58,8 @@ class InboundController extends Controller
             return response()->json($data, Response::HTTP_NOT_FOUND);
         }
         $vol = (\request()->get('vol') ?? 0) * pow(10, 9);
-        $inbound = InboundsDB::updateUserVol($inbound->remark, $vol);
-        info('increasing' . $inbound->remark . ' vol for ' . $vol . ' GB');
+        $inbound = InboundsDB::updateUserVol(\request()->get('remark'), $vol);
+        info('increasing' . \request()->get('remark') . ' vol for ' . $vol . ' GB');
         $data = [
             'status' => Response::HTTP_OK,
             'data' => $inbound
@@ -77,7 +77,7 @@ class InboundController extends Controller
             ];
             return response()->json($data, Response::HTTP_NOT_FOUND);
         }
-        $inbound = InboundsDB::updateExpiry($inbound->remark);
+        $inbound = InboundsDB::updateExpiry(\request()->get('remark'));
         $data = [
             'status' => Response::HTTP_OK,
             'data' => $inbound
@@ -96,7 +96,7 @@ class InboundController extends Controller
             return response()->json($data, Response::HTTP_NOT_FOUND);
         }
         $extra_days = \request()->get('days');
-        $inbound = InboundsDB::addDays($inbound->remark, $extra_days);
+        $inbound = InboundsDB::addDays(\request()->get('remark'), $extra_days);
         $data = [
             'status' => Response::HTTP_OK,
             'data' => $inbound
@@ -138,7 +138,7 @@ class InboundController extends Controller
     public function reconnectInbound()
     {
         $inbound = InboundsDB::getUserByRemark(\request()->get('remark'));
-        $inbound = InboundsDB::reconnect($inbound->remark);
+        $inbound = InboundsDB::reconnect(\request()->get('remark'));
         $data = [
             'status' => Response::HTTP_OK,
             'data' => $inbound
@@ -149,7 +149,7 @@ class InboundController extends Controller
     public function disconnectInbound()
     {
         $inbound = InboundsDB::getUserByRemark(\request()->get('remark'));
-        $inbound = InboundsDB::disconnect($inbound->remark);
+        $inbound = InboundsDB::disconnect(\request()->get('remark'));
         $data = [
             'status' => Response::HTTP_OK,
             'data' => $inbound

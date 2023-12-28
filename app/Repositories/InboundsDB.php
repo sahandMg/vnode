@@ -17,7 +17,11 @@ class InboundsDB
     public static function getUserByRemark($remark)
     {
         $remark = strtolower($remark);
-        return DB::table('client_infos')->where('email', $remark)->first();
+        return DB::table('client_traffics')
+            ->where('email', $remark)
+            ->select('*', 'client_traffics.up as up', 'client_traffics.down as down', 'client_traffics.total as total', 'client_traffics.expiry_time as expiry_time', 'client_traffics.enable as enable')
+            ->join('inbounds', 'client_traffics.inbound_id', '=', 'inbounds.id')
+            ->first();
     }
 
     public static function updateNetworkTrafficByPort($port, $sent, $received)
@@ -56,7 +60,7 @@ class InboundsDB
 
     public static function getLatestInbound($remarkTempla)
     {
-       return DB::table('inbounds')
+        return DB::table('inbounds')
             ->where('remark', 'like', "%$remarkTempla%")
             ->orderBy('id', 'desc')
             ->first();
@@ -216,17 +220,32 @@ class InboundsDB
     public static function updateUserVol($remark, $vol)
     {
         $remark = strtolower($remark);
-        $inbound = DB::table('client_infos')->where('email', $remark)->first();
-        DB::table('client_infos')
+        $inbound = DB::table('client_traffics')
+            ->select('*', 'client_traffics.up as up', 'client_traffics.down as down', 'client_traffics.total as total', 'client_traffics.expiry_time as expiry_time')
+            ->where('email', $remark)
+            ->join('inbounds', 'client_traffics.inbound_id', '=', 'inbounds.id')
+            ->first();
+        DB::table('client_traffics')
             ->where('email', $remark)
             ->update(['total' => $inbound->total + $vol, 'enable' => 1]);
-        $inbound->enable = 1;
-        $inbound->total = $inbound->total + $vol;
-        $inbound_arr = Utils::prepareInboundForUpdate($inbound);
+
+        $settings = json_decode($inbound->settings);
+        $user_id = '';
+        $total = $inbound->total + $vol;
+        $clients = collect($settings->clients)->map(function ($client) use ($remark, $total, &$user_id) {
+            if ($client->email == $remark) {
+                $client->enable = true;
+                $client->totalGB = $total;
+                $user_id = $client->id;
+            }
+            return $client;
+        });
+        $inbound->settings = json_encode(['clients' => $clients]);
+        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => $clients])];
         $user = UserDB::getUserData();
         $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
-        $cookie = Http::sendHttpLogin($login_url);
-        $update_url = config('bot.update_url') . $inbound->id;
+        $cookie = trim(Http::sendHttpLogin($login_url));
+        $update_url = config('bot.update_url') . $user_id;
         Http::sendHttp($update_url, $inbound_arr, ['Cookie:' . $cookie]);
         return $inbound;
     }
@@ -234,10 +253,11 @@ class InboundsDB
     public static function updateExpiry($remark)
     {
         $remark = strtolower($remark);
-        $inbound = DB::table('client_infos')
+        $inbound = DB::table('client_traffics')
+            ->select('*', 'client_traffics.up as up', 'client_traffics.down as down', 'client_traffics.total as total', 'client_traffics.expiry_time as expiry_time')
             ->where('email', $remark)
+            ->join('inbounds', 'client_traffics.inbound_id', '=', 'inbounds.id')
             ->first();
-        $total = 0;
         $base = 64424509440;
         $used = $inbound->up + $inbound->down;
         if ($inbound->total == $base) {
@@ -250,12 +270,13 @@ class InboundsDB
         } else {
             $total = $inbound->total;
         }
+        $settings = json_decode($inbound->settings);
         $agent = request()->get('agent') ?? 'user';
         $exp_date = $agent == 'user' ?
-            Jalalian::now()->addMonths()->addDays(2)->toCarbon()->getPreciseTimestamp(3)
+            Jalalian::now()->addMonths()->toCarbon()->getPreciseTimestamp(3)
             :
-            Jalalian::now()->addMonths(1)->toCarbon()->getPreciseTimestamp(3);
-        DB::table('client_infos')
+            Jalalian::now()->addMonths()->toCarbon()->getPreciseTimestamp(3);
+        DB::table('client_traffics')
             ->where('email', $remark)
             ->update([
                 'expiry_time' => $exp_date,
@@ -264,16 +285,24 @@ class InboundsDB
                 'down' => 0,
                 'total' => $total
             ]);
-        $inbound->enable = 1;
-        $inbound->total = $total;
+        $user_id = '';
+        $clients = collect($settings->clients)->map(function ($client) use ($remark, $total, $exp_date, &$user_id) {
+            if ($client->email == $remark) {
+                $client->enable = true;
+                $client->totalGB = $total;
+                $client->expiryTime = $exp_date;
+                $user_id = $client->id;
+            }
+            return $client;
+        });
         $inbound->down = 0;
         $inbound->up = 0;
-        $inbound->expiry_time = $exp_date;
-        $inbound_arr = Utils::prepareInboundForUpdate($inbound);
+        $inbound->settings = json_encode(['clients' => $clients]);
+        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => $clients])];
         $user = UserDB::getUserData();
         $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
-        $cookie = Http::sendHttpLogin($login_url);
-        $update_url = config('bot.update_url') . $inbound->id;
+        $cookie = trim(Http::sendHttpLogin($login_url));
+        $update_url = config('bot.update_url') . $user_id;
         Http::sendHttp($update_url, $inbound_arr, ['Cookie:' . $cookie]);
         return $inbound;
     }
@@ -281,12 +310,12 @@ class InboundsDB
     public static function addDays($remark, $days_num)
     {
         $remark = strtolower($remark);
-        $inbound = DB::table('client_infos')
+        $inbound = DB::table('client_traffics')
             ->where('email', $remark)
             ->first();
         $ts_in_sec = (int)round($inbound->expiry_time / 1000);
         $exp_date = Carbon::parse($ts_in_sec)->addDays($days_num)->getPreciseTimestamp(3);
-        DB::table('client_infos')
+        DB::table('client_traffics')
             ->where('email', $remark)
             ->update([
                 'expiry_time' => $exp_date,
@@ -295,23 +324,38 @@ class InboundsDB
         return $inbound;
     }
 
+    public static function restart($remark)
+    {
+        self::disconnect($remark);
+        self::reconnect($remark);
+    }
+
     public static function reconnect($remark)
     {
         $remark = strtolower($remark);
-        $inbound = DB::table('client_infos')
+        $inbound = DB::table('client_traffics')
             ->where('email', $remark)
+            ->join('inbounds', 'client_traffics.inbound_id', '=', 'inbounds.id')
             ->first();
-        DB::table('client_infos')
+        DB::table('client_traffics')
             ->where('email', $remark)
             ->update([
                 'enable' => 1,
             ]);
-        $inbound->enable = 1;
-        $inbound_arr = Utils::prepareInboundForUpdate($inbound);
+        $settings = json_decode($inbound->settings);
+        $clients = collect($settings->clients)->map(function ($client) use ($remark, &$user_id) {
+            if ($client->email == $remark) {
+                $client->enable = true;
+                $user_id = $client->id;
+            }
+            return $client;
+        });
+        $inbound->settings = json_encode(['clients' => $clients]);
+        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => $clients])];
         $user = UserDB::getUserData();
         $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
-        $cookie = Http::sendHttpLogin($login_url);
-        $update_url = config('bot.update_url') . $inbound->id;
+        $cookie = trim(Http::sendHttpLogin($login_url));
+        $update_url = config('bot.update_url') . $user_id;
         Http::sendHttp($update_url, $inbound_arr, ['Cookie:' . $cookie]);
         return $inbound;
     }
@@ -319,20 +363,29 @@ class InboundsDB
     public static function disconnect($remark)
     {
         $remark = strtolower($remark);
-        $inbound = DB::table('client_infos')
+        $inbound = DB::table('client_traffics')
             ->where('email', $remark)
+            ->join('inbounds', 'client_traffics.inbound_id', '=', 'inbounds.id')
             ->first();
-        DB::table('client_infos')
+        DB::table('client_traffics')
             ->where('email', $remark)
             ->update([
                 'enable' => 0,
             ]);
-        $inbound->enable = 0;
-        $inbound_arr = Utils::prepareInboundForUpdate($inbound);
+        $settings = json_decode($inbound->settings);
+        $clients = collect($settings->clients)->map(function ($client) use ($remark, &$user_id) {
+            if ($client->email == $remark) {
+                $client->enable = false;
+                $user_id = $client->id;
+            }
+            return $client;
+        });
+        $inbound->settings = json_encode(['clients' => $clients]);
+        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => $clients])];
         $user = UserDB::getUserData();
         $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
-        $cookie = Http::sendHttpLogin($login_url);
-        $update_url = config('bot.update_url') . $inbound->id;
+        $cookie = trim(Http::sendHttpLogin($login_url));
+        $update_url = config('bot.update_url') . $user_id;
         Http::sendHttp($update_url, $inbound_arr, ['Cookie:' . $cookie]);
         return $inbound;
     }
