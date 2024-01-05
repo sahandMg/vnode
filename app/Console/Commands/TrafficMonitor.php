@@ -65,7 +65,7 @@ class TrafficMonitor extends Command
                 $port = explode(':', $tmp[1])[1];
                 $source = array_values(array_filter(explode(' ', $cumulative[$i + 1])));
                 $source_ip = explode(':', $source[0])[0];
-                info($port.' '.$source_ip);
+//                info($port.' '.$source_ip);
                 if (!in_array($port, $all_ports)) {
                     continue;
                 }

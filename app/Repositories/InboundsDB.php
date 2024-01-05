@@ -232,16 +232,15 @@ class InboundsDB
         $settings = json_decode($inbound->settings);
         $user_id = '';
         $total = $inbound->total + $vol;
-        $clients = collect($settings->clients)->map(function ($client) use ($remark, $total, &$user_id) {
+        foreach ($settings->clients as $client) {
             if ($client->email == $remark) {
                 $client->enable = true;
                 $client->totalGB = $total;
                 $user_id = $client->id;
+                break;
             }
-            return $client;
-        });
-        $inbound->settings = json_encode(['clients' => $clients]);
-        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => $clients])];
+        }
+        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => [$client]])];
         $user = UserDB::getUserData();
         $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
         $cookie = trim(Http::sendHttpLogin($login_url));
@@ -286,19 +285,18 @@ class InboundsDB
                 'total' => $total
             ]);
         $user_id = '';
-        $clients = collect($settings->clients)->map(function ($client) use ($remark, $total, $exp_date, &$user_id) {
+        foreach ($settings->clients as $client) {
             if ($client->email == $remark) {
                 $client->enable = true;
                 $client->totalGB = $total;
                 $client->expiryTime = $exp_date;
                 $user_id = $client->id;
+                break;
             }
-            return $client;
-        });
+        }
         $inbound->down = 0;
         $inbound->up = 0;
-        $inbound->settings = json_encode(['clients' => $clients]);
-        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => $clients])];
+        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => [$client]])];
         $user = UserDB::getUserData();
         $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
         $cookie = trim(Http::sendHttpLogin($login_url));
@@ -343,15 +341,14 @@ class InboundsDB
                 'enable' => 1,
             ]);
         $settings = json_decode($inbound->settings);
-        $clients = collect($settings->clients)->map(function ($client) use ($remark, &$user_id) {
+        foreach ($settings->clients as $client) {
             if ($client->email == $remark) {
                 $client->enable = true;
                 $user_id = $client->id;
+                break;
             }
-            return $client;
-        });
-        $inbound->settings = json_encode(['clients' => $clients]);
-        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => $clients])];
+        }
+        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => [$client]])];
         $user = UserDB::getUserData();
         $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
         $cookie = trim(Http::sendHttpLogin($login_url));
@@ -373,15 +370,14 @@ class InboundsDB
                 'enable' => 0,
             ]);
         $settings = json_decode($inbound->settings);
-        $clients = collect($settings->clients)->map(function ($client) use ($remark, &$user_id) {
+        foreach ($settings->clients as $client) {
             if ($client->email == $remark) {
                 $client->enable = false;
                 $user_id = $client->id;
+                break;
             }
-            return $client;
-        });
-        $inbound->settings = json_encode(['clients' => $clients]);
-        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => $clients])];
+        }
+        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => [$client]])];
         $user = UserDB::getUserData();
         $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
         $cookie = trim(Http::sendHttpLogin($login_url));
