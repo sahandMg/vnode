@@ -17,11 +17,17 @@ class InboundsDB
     public static function getUserByRemark($remark)
     {
         $remark = strtolower($remark);
-        return DB::table('client_traffics')
+        $record = DB::table('client_traffics')
             ->where('email', $remark)
             ->select('*', 'client_traffics.up as up', 'client_traffics.down as down', 'client_traffics.total as total', 'client_traffics.expiry_time as expiry_time', 'client_traffics.enable as enable')
             ->join('inbounds', 'client_traffics.inbound_id', '=', 'inbounds.id')
             ->first();
+        $settings = json_decode($record->settings);
+        $r = collect($settings->clients)->filter(function ($r) use ($remark) {
+            return $r->email == $remark;
+        });
+        $record->enable = $r->first()->enable;
+        return $record;
     }
 
     public static function updateNetworkTrafficByPort($port, $sent, $received)
