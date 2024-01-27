@@ -75,6 +75,15 @@ Route::get('remarks', function () {
     return Cache::get('remarks');
 });
 
+Route::get('usage', function () {
+    $inbounds = InboundsDB::getAllActiveInbounds();
+    $total_vol = 0;
+    foreach ($inbounds as $inbound) {
+        $total_vol += $inbound->down + $inbound->up;
+    }
+    return $total_vol / pow(10, 9);
+});
+
 Route::get('account', [InboundController::class, 'createAccount']);
 
 Route::get('transpiler', function () {

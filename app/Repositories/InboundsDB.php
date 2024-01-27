@@ -378,4 +378,9 @@ class InboundsDB
     {
         return DB::table('inbounds')->where('enable', 1)->where('port', $port)->first();
     }
+
+    public static function getAllActiveInbounds()
+    {
+        return DB::table('inbounds')->where('enable', 1)->get();
+    }
 }
