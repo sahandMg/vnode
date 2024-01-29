@@ -37,7 +37,7 @@ class TrafficMonitor extends Command
     public function handle()
     {
 //        include(app_path('Services/phpseclib/Net/SSH2.php'));
-//        $ssh = new Net_SSH2('185.36.231.170');
+//        $ssh = new Net_SSH2('178.157.82.59');
 //        if (!$ssh->login('root', 'Ss44644831')) {
 //            exit('Login Failed');
 //        }
@@ -49,38 +49,47 @@ class TrafficMonitor extends Command
 //        Add these lines to cronttab -e
         //* * * * * php /var/www/html/vnode/artisan traffic
         //* * * * * sleep 30; php /var/www/html/vnode/artisan traffic
-        $txt = shell_exec("sudo iftop -P -n -N -t -s 40 -L 250 -o 0s");
-        $t = array_filter(explode(PHP_EOL, $txt));
-        $cumulative = array_splice($t, 7, 200);
-        $ports = [];
-        $port_div = [];
-        $all_ports = InboundsDB::getAllPorts();
-        for ($i = 0; $i < count($cumulative); $i += 2) {
-            try {
-                $tmp = array_values(array_filter(explode(' ', $cumulative[$i])));
-                if (str_contains($tmp[1], '255.255.255.255')) {
-                    continue;
-                }
-                $ip = explode(':', $tmp[1])[0];
-                $port = explode(':', $tmp[1])[1];
-                $source = array_values(array_filter(explode(' ', $cumulative[$i + 1])));
-                $source_ip = explode(':', $source[0])[0];
-                info($port.' '.$source_ip);
-                if (!in_array($port, $all_ports)) {
-                    continue;
-                }
-                if (!isset($ports[$port])) {
-                    $ports[$port] = $source_ip;
-                    $port_div[$port][] = $source_ip;
-                } elseif (!in_array($source_ip, $port_div[$port])) {
-                    $port_div[$port][] = $source_ip;
-                }
-            } catch (\Exception $exception) {
-                Log::info('Error: ' . $exception->getMessage() . ' ' . $exception->getLine() . ' ' . $exception->getFile());
-//                dd($exception->getMessage().' '. $exception->getLine(). ' '.$exception->getFile(), $tmp);
+//        $txt = shell_exec("sudo iftop -P -n -N -t -s 40 -L 250 -o 0s");
+//        $t = array_filter(explode(PHP_EOL, $txt));
+//        $cumulative = array_splice($t, 7, 200);
+//        $ports = [];
+//        $port_div = [];
+//        $all_ports = InboundsDB::getAllPorts();
+//        for ($i = 0; $i < count($cumulative); $i += 2) {
+//            try {
+//                $tmp = array_values(array_filter(explode(' ', $cumulative[$i])));
+//                if (str_contains($tmp[1], '255.255.255.255')) {
+//                    continue;
+//                }
+//                $ip = explode(':', $tmp[1])[0];
+//                $port = explode(':', $tmp[1])[1];
+//                $source = array_values(array_filter(explode(' ', $cumulative[$i + 1])));
+//                $source_ip = explode(':', $source[0])[0];
+//                info($port.' '.$source_ip);
+//                if (!in_array($port, $all_ports)) {
+//                    continue;
+//                }
+//                if (!isset($ports[$port])) {
+//                    $ports[$port] = $source_ip;
+//                    $port_div[$port][] = $source_ip;
+//                } elseif (!in_array($source_ip, $port_div[$port])) {
+//                    $port_div[$port][] = $source_ip;
+//                }
+//            } catch (\Exception $exception) {
+//                Log::info('Error: ' . $exception->getMessage() . ' ' . $exception->getLine() . ' ' . $exception->getFile());
+////                dd($exception->getMessage().' '. $exception->getLine(). ' '.$exception->getFile(), $tmp);
+//            }
+//        }
+//        InboundsDB::storePorts($port_div);
+//        CacheDB::storeActiveSessions($port_div);
+        $resp = shell_exec('netstat -ul');
+        $t = array_filter(explode(PHP_EOL, $resp));
+        $counter = 0;
+        foreach ($t as $traffic_string) {
+            if (str_contains($traffic_string, 'udp6')) {
+                $counter += 1;
             }
         }
-        InboundsDB::storePorts($port_div);
-        CacheDB::storeActiveSessions($port_div);
+        CacheDB::storeActiveSessionNum($counter);
     }
 }

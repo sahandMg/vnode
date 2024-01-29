@@ -42,4 +42,9 @@ class CacheDB
     {
         return Cache::get('active_sessions');
     }
+
+    public static function storeActiveSessionNum($num)
+    {
+        Cache::put('active_sessions', $num, 600);
+    }
 }
