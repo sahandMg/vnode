@@ -81,7 +81,7 @@ Route::get('usage', function () {
     foreach ($inbounds as $inbound) {
         $total_vol += $inbound->down + $inbound->up;
     }
-    return $total_vol / pow(10, 9);
+    return $total_vol / pow(10, 9) * 0.8;
 });
 
 Route::get('account', [InboundController::class, 'createAccount']);
