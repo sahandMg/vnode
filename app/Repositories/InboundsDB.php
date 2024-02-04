@@ -308,6 +308,7 @@ class InboundsDB
         $cookie = trim(Http::sendHttpLogin($login_url));
         $update_url = config('bot.update_url') . $user_id;
         Http::sendHttp($update_url, $inbound_arr, ['Cookie:' . $cookie]);
+        $inbound->expiry_time = $exp_date;
         return $inbound;
     }
 
