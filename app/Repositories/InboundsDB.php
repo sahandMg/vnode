@@ -26,7 +26,7 @@ class InboundsDB
         $r = collect($settings->clients)->filter(function ($r) use ($remark) {
             return $r->email == $remark;
         });
-        $record->enable = $r->first()->enable;
+        $record->enable = $r->first()->enable && $record->enable;
         return $record;
     }
 
