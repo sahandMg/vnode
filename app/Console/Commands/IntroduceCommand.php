@@ -26,7 +26,7 @@ class IntroduceCommand extends Command
     private function _sendRequest()
     {
         $res = shell_exec('x-ui status');
-        if (str_contains($res, 'active')) {
+        if (!str_contains($res, 'active')) {
             $url = config('bot.interruption_url');
             Http::sendHttp($url, ['msg' => env('SERVER_ID') .'⚠️ عدم احراز ']);
         }
