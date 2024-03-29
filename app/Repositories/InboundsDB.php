@@ -237,19 +237,19 @@ class InboundsDB
         $inbound = DB::table('inbounds')
             ->where('remark', $remark)
             ->first();
-        $total = 0;
-        $base = 64424509440;
-        $used = $inbound->up + $inbound->down;
-        if ($inbound->total == $base) {
-            $total = 64424509440;
-        } elseif ($inbound->total > $base && $used >= $base) {
-            $remain = $inbound->total - $used;
-            $total = $remain + $base;
-        } elseif ($inbound->total > $base && $used < $base) {
-            $total = $inbound->total;
-        } else {
-            $total = $inbound->total;
-        }
+//        $base = 64424509440;
+//        $used = $inbound->up + $inbound->down;
+//        if ($inbound->total == $base) {
+//            $total = 64424509440;
+//        } elseif ($inbound->total > $base && $used >= $base) {
+//            $remain = $inbound->total - $used;
+//            $total = $remain + $base;
+//        } elseif ($inbound->total > $base && $used < $base) {
+//            $total = $inbound->total;
+//        } else {
+//            $total = $inbound->total;
+//        }
+        $total = $inbound->total;
         $agent = request()->get('agent') ?? 'user';
         $exp_date = $agent == 'user' ?
             Jalalian::now()->addMonths()->addDays(2)->toCarbon()->getPreciseTimestamp(3)
