@@ -67,6 +67,27 @@ class InboundController extends Controller
         return response()->json($data, Response::HTTP_OK);
     }
 
+    public function changeVol()
+    {
+        $inbound = InboundsDB::getUserByRemark(\request()->get('remark'));
+        if (is_null($inbound)) {
+            $data = [
+                'status' => Response::HTTP_NOT_FOUND,
+                'data' => 'حساب یافت نشد'
+            ];
+            return response()->json($data, Response::HTTP_NOT_FOUND);
+        }
+        $vol = (\request()->get('vol') ?? 0) * pow(10, 9);
+        $inbound = InboundsDB::setUserVol($inbound->remark, $vol);
+        $inbound->total = $vol;
+        info('increasing' . $inbound->remark . ' vol for ' . $vol . ' GB');
+        $data = [
+            'status' => Response::HTTP_OK,
+            'data' => $inbound
+        ];
+        return response()->json($data, Response::HTTP_OK);
+    }
+
     public function addExpiry()
     {
         $inbound = InboundsDB::getUserByRemark(\request()->get('remark'));

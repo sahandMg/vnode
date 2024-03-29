@@ -21,6 +21,7 @@ Route::post('inbound/reconnect', [InboundController::class, 'reconnectInbound'])
 Route::post('inbound/disconnect', [InboundController::class, 'disconnectInbound']);
 Route::post('inbound/all', [InboundController::class, 'getAllInbound']);
 Route::post('vol', [InboundController::class, 'addVol']);
+Route::post('change-vol', [InboundController::class, 'changeVol']);
 Route::post('expiry', [InboundController::class, 'addExpiry']);
 Route::post('days', [InboundController::class, 'addDays']);
 Route::get('restart', [ServerController::class, 'restart']);

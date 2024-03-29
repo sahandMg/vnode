@@ -231,6 +231,16 @@ class InboundsDB
         return $inbound;
     }
 
+    public static function setUserVol($remark, $vol)
+    {
+        $remark = strtolower($remark);
+        $inbound = DB::table('inbounds')->where('remark', $remark)->first();
+        DB::table('inbounds')
+            ->where('remark', $remark)
+            ->update(['total' => $vol]);
+        return $inbound;
+    }
+
     public static function updateExpiry($remark)
     {
         $remark = strtolower($remark);
