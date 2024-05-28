@@ -19,7 +19,7 @@ class CheckAccountState extends Command
 
     public function handle()
     {
-        $accounts = DB::table('inbounds')->where('enable', 1)->get();
+        $accounts = DB::table('client_traffics')->where('enable', 1)->get();;
         $expireis = [];
         $vols = [];
         foreach ($accounts as $account) {
