@@ -316,15 +316,37 @@ class InboundsDB
     {
         $remark = strtolower($remark);
         $inbound = DB::table('client_traffics')
+            ->select('*', 'client_traffics.up as up', 'client_traffics.down as down', 'client_traffics.total as total', 'client_traffics.expiry_time as expiry_time')
             ->where('email', $remark)
+            ->join('inbounds', 'client_traffics.inbound_id', '=', 'inbounds.id')
             ->first();
+        $total = $inbound->total;
+
+        $settings = json_decode($inbound->settings);
+        $agent = request()->get('agent') ?? 'user';
         $ts_in_sec = (int)round($inbound->expiry_time / 1000);
         $exp_date = Carbon::parse($ts_in_sec)->addDays($days_num)->getPreciseTimestamp(3);
         DB::table('client_traffics')
             ->where('email', $remark)
             ->update([
                 'expiry_time' => $exp_date,
+                'total' => $total
             ]);
+        $user_id = '';
+        foreach ($settings->clients as $client) {
+            if ($client->email == $remark) {
+                $client->totalGB = $total;
+                $client->expiryTime = $exp_date;
+                $user_id = $client->id;
+                break;
+            }
+        }
+        $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => [$client]])];
+        $user = UserDB::getUserData();
+        $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
+        $cookie = trim(Http::sendHttpLogin($login_url));
+        $update_url = config('bot.update_url') . $user_id;
+        Http::sendHttp($update_url, $inbound_arr, ['Cookie:' . $cookie]);
         $inbound->expiry_time = $exp_date;
         return $inbound;
     }
