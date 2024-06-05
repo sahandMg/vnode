@@ -305,6 +305,22 @@ class InboundsDB
         return $inbound;
     }
 
+    public static function changeDate($remark, $date)
+    {
+        $remark = strtolower($remark);
+        $inbound = DB::table('inbounds')
+            ->where('remark', $remark)
+            ->first();
+        $exp_date = Carbon::parse($date)->getPreciseTimestamp(3);
+        DB::table('inbounds')
+            ->where('remark', $remark)
+            ->update([
+                'expiry_time' => $exp_date,
+            ]);
+        $inbound->expiry_time = $exp_date;
+        return $inbound;
+    }
+
     public static function reconnect($remark)
     {
         $remark = strtolower($remark);
