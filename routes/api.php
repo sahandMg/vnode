@@ -23,4 +23,5 @@ Route::post('inbound/all', [InboundController::class, 'getAllInbound']);
 Route::post('vol', [InboundController::class, 'addVol']);
 Route::post('expiry', [InboundController::class, 'addExpiry']);
 Route::post('days', [InboundController::class, 'addDays']);
+Route::post('change-date', [InboundController::class, 'changeDate']);
 Route::get('restart', [ServerController::class, 'restart']);
