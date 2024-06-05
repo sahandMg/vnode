@@ -262,7 +262,7 @@ class InboundsDB
         $total = $inbound->total;
         $agent = request()->get('agent') ?? 'user';
         $exp_date = $agent == 'user' ?
-            Jalalian::now()->addMonths()->addDays(2)->toCarbon()->getPreciseTimestamp(3)
+            Jalalian::now()->addMonths()->toCarbon()->getPreciseTimestamp(3)
             :
             Jalalian::now()->addMonths(1)->toCarbon()->getPreciseTimestamp(3);
         DB::table('inbounds')
