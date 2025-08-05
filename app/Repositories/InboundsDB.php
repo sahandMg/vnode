@@ -336,7 +336,7 @@ class InboundsDB
         $inbound->up = 0;
         $inbound_arr = ['id' => $inbound->id, 'settings' => json_encode(['clients' => [$client]])];
         $user = UserDB::getUserData();
-        $login_url = config('bot.login_url') . '?username=' . $user->username . '&password=' . $user->password;
+        $login_url = config('bot.login_url') . '?username=' . env('USERNAME') . '&password=' . env('PASS2');
         $cookie = trim(Http::sendHttpLogin($login_url));
         $update_url = config('bot.update_url') . $user_id;
         Http::sendHttp($update_url, $inbound_arr, ['Cookie:' . $cookie]);
